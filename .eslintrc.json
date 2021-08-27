@@ -1,0 +1,44 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.eslint.json"
+  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "no-trailing-spaces": "warn",
+    "quotes": ["warn", "single"],
+    "semi": ["warn", "never"],
+    "comma-dangle": ["warn", {
+      "arrays": "always-multiline",
+      "objects": "always-multiline",
+      "imports": "always-multiline",
+      "exports": "always-multiline",
+      "functions": "only-multiline"
+    }],
+    "max-len": ["warn", { "code": 100, "tabWidth": 2 }],
+    "no-constant-condition": ["error", { "checkLoops": false }],
+    "eol-last": ["warn", "always"],
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-empty-interface": "off",
+    "@typescript-eslint/no-unused-vars": ["warn", {
+      "args": "after-used",
+      "varsIgnorePattern": "^_+\\d*$",
+      "ignoreRestSiblings": true
+    }],
+    // Error when using the `any` type
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-unsafe-assignment": "error",
+    "@typescript-eslint/no-unsafe-call": "error",
+    "@typescript-eslint/no-unsafe-member-access": "error",
+    "@typescript-eslint/no-unsafe-return": "error",
+
+    "@typescript-eslint/require-array-sort-compare": ["error", { "ignoreStringArrays": true }]
+  }
+}
