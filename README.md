@@ -29,3 +29,12 @@ yarn start
 ```
 
 To clean the built `.js` files, run `yarn clean`.
+
+### Docker
+Building and running the application as a Docker image is as simple as running
+```sh
+docker build --tag pingboard .
+docker run --rm -it -p3000:3000 pingboard
+```
+You can then access the application on http://localhost:3000/.
+To stop the application, press `ctrl + c`.
