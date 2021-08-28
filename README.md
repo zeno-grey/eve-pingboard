@@ -86,7 +86,7 @@ CORE_APP_TOKEN
 ## Database setup
 The application supports both MariaDB and MySQL (via [mysql2](https://www.npmjs.com/package/mysql2) and [knex.js](https://www.npmjs.com/package/knex)).
 
-During development, you can use `docker-compose up` to start a local MariaDB instance.
+During development, you can use `docker-compose -f docker-compose.dev.yml up` to start a local MariaDB instance.
 
 ### Migrations
 Before starting the application, you should make sure the database schema is up to date.
