@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  pingboard:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: "3001"
+      NODE_ENV: "production"
+      COOKIE_KEY:
+      DB_URL:
+      SSO_CLIENT_ID:
+      SSO_CLIENT_SECRET:
+      SSO_REDIRECT_URI: "http://localhost:3001/auth/callback"
+      CORE_URL:
+      CORE_APP_ID:
+      CORE_APP_TOKEN:
+
+  mariadb:
+    image: mariadb:10.6.4-focal
+    ports:
+      - "3306:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: "toor"
+      MARIADB_DATABASE: "pingboard"
+      MARIADB_USER: "pingboard"
+      MARIADB_PASSWORD: "pingboard"
