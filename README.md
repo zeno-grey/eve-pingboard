@@ -38,3 +38,45 @@ docker run --rm -it -p3000:3000 pingboard
 ```
 You can then access the application on http://localhost:3000/.
 To stop the application, press `ctrl + c`.
+
+## Configuration
+The application can be configured using the following environment variables.
+Default values are specified if available.
+If the variable doesn't have default value, you *must* set it or the application will fail to launch, except when stated otherwise.
+
+### HTTP Server configuration
+```sh
+# The environment the application runs in. Should be either "development" or "production".
+# All other values are assumed to be equal to "production" as well.
+NODE_ENV=production
+# The port for the HTTP server to listen on
+PORT=3000
+# Key to use to sign and verify session cookies
+# Is not required to be set when NODE_ENV is "development".
+COOKIE_KEY
+```
+
+### Eve SSO configuration
+(as obtained via https://developers.eveonline.com/applications)
+```sh
+# The Client ID of the registered Eve application
+SSO_CLIENT_ID
+# The Client Secret of the registered Eve application
+SSO_CLIENT_SECRET
+# The redirect URI/Callback URL of the registerd Eve application
+# The application listenes for OAuth2 callbacks on /auth/callback.
+# During development, this is usually http://localhost:3000/auth/callback, but
+# if you mount the application behind a reverse proxy and under a subpath, it
+# may also be something like https://example.com/pingboard/auth/callback.
+SSO_REDIRECT_URI
+```
+
+### Neucore configuration
+```sh
+# The base URL of the Neucore API to use (e.g. https://account.bravecollective.com/api)
+CORE_URL
+# The ID of the Neucore application (as obtained from Neucore)
+CORE_APP_ID
+# The Secret of the Neucore application (as obtained from Neucore)
+CORE_APP_TOKEN
+```
