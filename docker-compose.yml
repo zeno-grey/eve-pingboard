@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  mariadb:
+    image: mariadb:10.6.4-focal
+    ports:
+      - "3306:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: "toor"
+      MARIADB_DATABASE: "pingboard"
+      MARIADB_USER: "pingboard"
+      MARIADB_PASSWORD: "pingboard"
