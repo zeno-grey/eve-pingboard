@@ -1,4 +1,5 @@
 import Koa, { Middleware, Next } from 'koa'
+import { Group } from '../neucore'
 
 export interface SessionProvider {
   createSession(data: Omit<Session, 'id'>): Promise<Readonly<Session>>
@@ -14,6 +15,7 @@ export interface Session {
   character?: {
     id: number
     name: string
+    neucoreGroups: Group[]
   }
 }
 

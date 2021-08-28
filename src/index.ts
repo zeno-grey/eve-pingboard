@@ -1,4 +1,5 @@
 import { getApp } from './app'
+import { NeucoreClient } from './neucore'
 import { EveSSOClient } from './sso/eve-sso-client'
 import { InMemorySessionProvider } from './util/in-memory-session-provider'
 
@@ -8,6 +9,11 @@ async function main() {
     clientSecret: getFromEnv('SSO_CLIENT_SECRET'),
     redirectUri: getFromEnv('SSO_REDIRECTURI'),
   })
+  const neucoreClient = new NeucoreClient({
+    baseUrl: getFromEnv('CORE_URL'),
+    appId: getFromEnv('CORE_APP_ID'),
+    appToken: getFromEnv('CORE_APP_TOKEN'),
+  })
   const sessionProvider = new InMemorySessionProvider()
 
   eveSsoClient.startAutoCleanup()
@@ -15,6 +21,7 @@ async function main() {
 
   const app = getApp({
     eveSsoClient,
+    neucoreClient,
     sessionProvider,
   })
 

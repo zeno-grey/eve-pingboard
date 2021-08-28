@@ -2,9 +2,11 @@ import Router from '@koa/router'
 import { Unauthorized } from 'http-errors'
 import { URL } from 'url'
 import { EveSSOClient } from '../sso/eve-sso-client'
+import { NeucoreClient, NeucoreResponseError } from '../neucore'
 
 export function getRouter(options: {
   eveSsoClient: EveSSOClient,
+  neucoreClient: NeucoreClient,
 }): Router {
   const router = new Router()
 
@@ -24,14 +26,27 @@ export function getRouter(options: {
     }
     const character = await options.eveSsoClient.handleCallback(session.id, ctx.query, ctx.href)
 
-    await ctx.resetSession({
-      character: {
-        id: character.characterId,
-        name: character.name,
-      },
-    })
-    console.log(`Successfully logged in ${character.name}`)
-    ctx.redirect(extractPath(session.postLoginRedirect))
+    try {
+      const neucoreGroups = await options.neucoreClient.getCharacterGroups(character.characterId)
+      await ctx.resetSession({
+        character: {
+          id: character.characterId,
+          name: character.name,
+          neucoreGroups,
+        },
+      })
+      console.log(`Successfully logged in ${character.name}`)
+      ctx.redirect(extractPath(session.postLoginRedirect))
+    } catch (error) {
+      if (error instanceof NeucoreResponseError && error.response.status === 404) {
+        ctx.body = {
+          message: 'You need to have a neucore account for this to work!',
+        }
+        ctx.status = 401
+      } else {
+        throw error
+      }
+    }
   })
 
   return router
