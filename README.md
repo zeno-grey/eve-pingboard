@@ -54,6 +54,8 @@ PORT=3000
 # Key to use to sign and verify session cookies
 # Is not required to be set when NODE_ENV is "development".
 COOKIE_KEY
+# Connection string for connecting with the SQL database (MariaDB/MySQL)
+DB_URL
 ```
 
 ### Eve SSO configuration

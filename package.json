@@ -9,14 +9,19 @@
     "start": "NODE_ENV=production yarn node --enable-source-maps ./dist/index.js",
     "dev": "NODE_ENV=development yarn ts-node-dev --inspect --files ./src/index.ts",
     "lint": "yarn run eslint ./src",
-    "lint:fix": "yarn run eslint ./src --fix"
+    "lint:fix": "yarn run eslint ./src --fix",
+    "migrate:latest": "knex migrate:latest",
+    "migrate:up": "knex migrate:up",
+    "migrate:down": "knex migrate:down"
   },
   "dependencies": {
     "@koa/router": "^10.1.1",
     "client-oauth2": "^4.3.3",
     "http-errors": "^1.8.0",
     "jsonwebtoken": "^8.5.1",
+    "knex": "^0.95.10",
     "koa": "^2.13.1",
+    "mysql2": "^2.3.0",
     "node-fetch": "^2.6.1",
     "uuid": "^8.3.2"
   },
