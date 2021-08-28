@@ -19,7 +19,7 @@ async function main() {
   eveSsoClient.startAutoCleanup()
   sessionProvider.startAutoCleanup()
 
-  const cookieSigningKeys = process.env.COOKIE_KEYS?.split(' ')
+  const cookieSigningKeys = process.env.COOKIE_KEY?.split(' ')
 
   const app = getApp({
     cookieSigningKeys,
