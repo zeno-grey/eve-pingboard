@@ -3,6 +3,7 @@ import * as uuid from 'uuid'
 import { EveJWT, parseEveJWT } from './eve-jwt'
 import type { ParsedUrlQuery } from 'querystring'
 import { BadRequest } from 'http-errors'
+import { createIntervalScheduler, IntervalScheduler } from '../util/create-interval-scheduler'
 
 export interface EveSSOClientConfig {
   /** The Client ID as obtained from https://developers.eveonline.com/ */
@@ -36,7 +37,7 @@ export class EveSSOClient {
   private readonly loginStates = new Map<string, LoginState>()
   private readonly stateTimeout: number
 
-  private cleanupInterval: NodeJS.Timeout | null = null
+  private readonly cleanupScheduler: IntervalScheduler
 
   constructor(options: EveSSOClientConfig) {
     this.clientId = options.clientId
@@ -49,6 +50,7 @@ export class EveSSOClient {
     })
 
     this.stateTimeout = options.stateTimeout ?? 300
+    this.cleanupScheduler = createIntervalScheduler(() => this.cleanupStates())
   }
 
   /**
@@ -56,17 +58,14 @@ export class EveSSOClient {
    * @param cleanupInterval the time between checks, in seconds
    */
   startAutoCleanup(cleanupInterval = this.stateTimeout): void {
-    this.stopAutoCleanup()
-    this.cleanupInterval = setInterval(() => this.cleanupStates(), 1000 * cleanupInterval)
+    this.cleanupScheduler.start(cleanupInterval * 1000)
   }
 
   /**
    * Stops any previously started automatic cleanup of login states.
    */
   stopAutoCleanup(): void {
-    if (this.cleanupInterval) {
-      clearTimeout(this.cleanupInterval)
-    }
+    this.cleanupScheduler.stop()
   }
 
   /** Removes all expired login states. */
