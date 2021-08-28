@@ -1,5 +1,6 @@
 import { getApp } from './app'
 import { EveSSOClient } from './sso/eve-sso-client'
+import { InMemorySessionProvider } from './util/in-memory-session-provider'
 
 async function main() {
   const eveSsoClient = new EveSSOClient({
@@ -7,9 +8,14 @@ async function main() {
     clientSecret: getFromEnv('SSO_CLIENT_SECRET'),
     redirectUri: getFromEnv('SSO_REDIRECTURI'),
   })
+  const sessionProvider = new InMemorySessionProvider()
+
+  eveSsoClient.startAutoCleanup()
+  sessionProvider.startAutoCleanup()
 
   const app = getApp({
     eveSsoClient,
+    sessionProvider,
   })
 
   const port = process.env.PORT ?? '3000'
