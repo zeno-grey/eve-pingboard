@@ -88,6 +88,8 @@ The application supports both MariaDB and MySQL (via [mysql2](https://www.npmjs.
 
 During development, you can use `docker-compose -f docker-compose.dev.yml up` to start a local MariaDB instance.
 
+**Note**: The following `yarn migrate:*` and `yarn seed` commands require that you specify the database connection string using the `DB_URL` environment variable!
+
 ### Migrations
 Before starting the application, you should make sure the database schema is up to date.
 To run all database migrations, use `yarn migrate:latest`.
