@@ -19,6 +19,7 @@
     "koa": "^2.13.1",
     "koa-session": "^6.2.0",
     "uuid": "^7.0.0"
+    "node-fetch": "^2.6.1",
   },
   "devDependencies": {
     "@types/http-errors": "^1",
@@ -27,6 +28,7 @@
     "@types/koa-session": "^5.10.4",
     "@types/koa__router": "^8.0.7",
     "@types/node": "^14.15.0",
+    "@types/node-fetch": "^2",
     "@types/uuid": "^8",
     "@typescript-eslint/eslint-plugin": "^4.29.3",
     "@typescript-eslint/parser": "^4.29.3",
