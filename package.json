@@ -7,7 +7,7 @@
     "build": "yarn tsc --build",
     "clean": "yarn tsc --build --clean",
     "start": "NODE_ENV=production yarn node --enable-source-maps ./dist/index.js",
-    "dev": "yarn ts-node-dev --files ./src/index.ts",
+    "dev": "NODE_ENV=development yarn ts-node-dev --inspect --files ./src/index.ts",
     "lint": "yarn run eslint ./src",
     "lint:fix": "yarn run eslint ./src --fix"
   },
