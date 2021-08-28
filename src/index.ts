@@ -7,7 +7,7 @@ async function main() {
   const eveSsoClient = new EveSSOClient({
     clientId: getFromEnv('SSO_CLIENT_ID'),
     clientSecret: getFromEnv('SSO_CLIENT_SECRET'),
-    redirectUri: getFromEnv('SSO_REDIRECTURI'),
+    redirectUri: getFromEnv('SSO_REDIRECT_URI'),
   })
   const neucoreClient = new NeucoreClient({
     baseUrl: getFromEnv('CORE_URL'),
