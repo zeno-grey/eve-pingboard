@@ -12,7 +12,8 @@
     "lint:fix": "yarn run eslint ./src --fix",
     "migrate:latest": "knex migrate:latest",
     "migrate:up": "knex migrate:up",
-    "migrate:down": "knex migrate:down"
+    "migrate:down": "knex migrate:down",
+    "seed": "knex seed:run"
   },
   "dependencies": {
     "@koa/router": "^10.1.1",

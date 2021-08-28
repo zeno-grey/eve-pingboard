@@ -82,3 +82,18 @@ CORE_APP_ID
 # The Secret of the Neucore application (as obtained from Neucore)
 CORE_APP_TOKEN
 ```
+
+## Database setup
+The application supports both MariaDB and MySQL (via [mysql2](https://www.npmjs.com/package/mysql2) and [knex.js](https://www.npmjs.com/package/knex)).
+
+During development, you can use `docker-compose up` to start a local MariaDB instance.
+
+### Migrations
+Before starting the application, you should make sure the database schema is up to date.
+To run all database migrations, use `yarn migrate:latest`.
+You can also use `yarn migrate:up` to run migrations one by one, and `yarn migrate:down` to roll back the latest migration.
+
+### Database Seeding
+Additional to running the database migrations, you should also seed the database before  first using the application using `yarn seed`.
+
+If you only want to run certain seed scripts from the `seeds` directory, you can use `yarn seed --specific [seedFileName]` (e.g. `yarn seed --specific solar-systems.ts`).
