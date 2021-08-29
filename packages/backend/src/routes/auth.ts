@@ -19,6 +19,11 @@ export function getRouter(options: {
     ctx.redirect(await options.eveSsoClient.getLoginUrl(session.id))
   })
 
+  router.post('/logout', async ctx => {
+    await ctx.clearSession()
+    ctx.status = 204
+  })
+
   router.get('/callback', async ctx => {
     const session = ctx.session
     if (!session) {
