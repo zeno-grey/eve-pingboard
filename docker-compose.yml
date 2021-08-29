@@ -1,7 +1,9 @@
 version: "3.8"
 services:
-  pingboard:
-    build: .
+  pingboard-backend:
+    build:
+      context: ./
+      dockerfile: ./packages/backend/Dockerfile
     ports:
       - "3001:3001"
     environment:

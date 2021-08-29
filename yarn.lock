@@ -150,6 +150,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ping-board/backend@workspace:packages/backend":
+  version: 0.0.0-use.local
+  resolution: "@ping-board/backend@workspace:packages/backend"
+  dependencies:
+    "@koa/router": ^10.1.1
+    "@types/http-errors": ^1
+    "@types/jsonwebtoken": ^8
+    "@types/koa": ^2
+    "@types/koa__router": ^8.0.7
+    "@types/node": ^14.15.0
+    "@types/node-fetch": ^2
+    "@types/uuid": ^8
+    "@typescript-eslint/eslint-plugin": ^4.29.3
+    "@typescript-eslint/parser": ^4.29.3
+    client-oauth2: ^4.3.3
+    eslint: ^7.32.0
+    http-errors: ^1.8.0
+    jsonwebtoken: ^8.5.1
+    knex: ^0.95.10
+    koa: ^2.13.1
+    mysql2: ^2.3.0
+    node-fetch: ^2.6.1
+    ts-node: ^10.2.1
+    ts-node-dev: ^1.1.8
+    typescript: ~4.3.5
+    uuid: ^8.3.2
+  languageName: unknown
+  linkType: soft
+
 "@servie/events@npm:^1.0.0":
   version: 1.0.0
   resolution: "@servie/events@npm:1.0.0"
@@ -351,9 +380,9 @@ __metadata:
   linkType: hard
 
 "@types/node@npm:*":
-  version: 16.7.2
-  resolution: "@types/node@npm:16.7.2"
-  checksum: aef77c109e2fd93b5dc6ec0a57a0878aaaa58adf0e63d9618d67b116ad3f2a3eb2589a99deaf9fda4a0805068b2533e3d2cf8e8dc3572251c498ec3dc929a76c
+  version: 16.7.5
+  resolution: "@types/node@npm:16.7.5"
+  checksum: 19765a6e2fea3269f627045a4e07a33f57dc567b5437c7bb18e585944a6c76a23e4b43969e586eac7d92247f424000992c1c8cbfd33faeae4676095aad4a2b61
   languageName: node
   linkType: hard
 
@@ -2643,28 +2672,9 @@ fsevents@~2.3.2:
   version: 0.0.0-use.local
   resolution: "ping-board@workspace:."
   dependencies:
-    "@koa/router": ^10.1.1
-    "@types/http-errors": ^1
-    "@types/jsonwebtoken": ^8
-    "@types/koa": ^2
-    "@types/koa__router": ^8.0.7
-    "@types/node": ^14.15.0
-    "@types/node-fetch": ^2
-    "@types/uuid": ^8
     "@typescript-eslint/eslint-plugin": ^4.29.3
     "@typescript-eslint/parser": ^4.29.3
-    client-oauth2: ^4.3.3
-    eslint: ^7.32.0
-    http-errors: ^1.8.0
-    jsonwebtoken: ^8.5.1
-    knex: ^0.95.10
-    koa: ^2.13.1
-    mysql2: ^2.3.0
-    node-fetch: ^2.6.1
-    ts-node: ^10.2.1
-    ts-node-dev: ^1.1.8
     typescript: ~4.3.5
-    uuid: ^8.3.2
   languageName: unknown
   linkType: soft
 

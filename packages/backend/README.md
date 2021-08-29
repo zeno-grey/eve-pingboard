@@ -33,9 +33,11 @@ To clean the built `.js` files, run `yarn clean`.
 ### Docker
 Building and running the application as a Docker image is as simple as running
 ```sh
-docker build --tag pingboard .
-docker run --rm -it -p3000:3000 pingboard
+docker build --tag pingboard:latest -f Dockerfile ../../ 
+docker run --rm -it -p3000:3000 pingboard:latest
 ```
+(Note that the Docker build context has to be the root of the project)
+
 You can then access the application on http://localhost:3000/.
 To stop the application, press `ctrl + c`.
 
@@ -86,7 +88,8 @@ CORE_APP_TOKEN
 ## Database setup
 The application supports both MariaDB and MySQL (via [mysql2](https://www.npmjs.com/package/mysql2) and [knex.js](https://www.npmjs.com/package/knex)).
 
-During development, you can use `docker-compose -f docker-compose.dev.yml up` to start a local MariaDB instance.
+During development, you can use `docker-compose -f docker-compose.dev.yml up` (run from the project's root directory) to start a local MariaDB instance.
+The database, user and password are all `pingboard`.
 
 **Note**: The following `yarn migrate:*` and `yarn seed` commands require that you specify the database connection string using the `DB_URL` environment variable!
 

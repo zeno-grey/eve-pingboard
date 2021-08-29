@@ -1,9 +1,11 @@
 *
+
 !.yarn/plugins
 !.yarn/releases
 !.yarn/sdks
-!src/
 !.yarnrc.yml
+!yarn.lock
+
+!packages/**/*
 !package.json
 !tsconfig.json
-!yarn.lock
