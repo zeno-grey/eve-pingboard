@@ -1,22 +1,47 @@
 version: "3.8"
 services:
+  traefik:
+    image: traefik:v2.4.0
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:3000
+    ports:
+      - 3000:3000
+      - 8081:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  pingboard-frontend:
+    build:
+      context: ./
+      dockerfile: ./packages/frontend/Dockerfile
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.pingboard-frontend.entrypoints: web
+      traefik.http.routers.pingboard-frontend.rule: PathPrefix(`/`)
+      traefik.http.services.pingboard-frontend.loadbalancer.server.port: 80
+
   pingboard-backend:
     build:
       context: ./
       dockerfile: ./packages/backend/Dockerfile
-    ports:
-      - "3001:3001"
     environment:
-      PORT: "3001"
       NODE_ENV: "production"
       COOKIE_KEY:
       DB_URL:
       SSO_CLIENT_ID:
       SSO_CLIENT_SECRET:
-      SSO_REDIRECT_URI: "http://localhost:3001/auth/callback"
+      SSO_REDIRECT_URI: "http://localhost:3000/auth/callback"
       CORE_URL:
       CORE_APP_ID:
       CORE_APP_TOKEN:
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.pingboard-backend.entrypoints: web
+      traefik.http.routers.pingboard-backend.rule: PathPrefix(`/auth`, `/api`)
+      traefik.http.services.pingboard-backend.loadbalancer.server.port: 3000
 
   mariadb:
     image: mariadb:10.6.4-focal
