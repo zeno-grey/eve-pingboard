@@ -1,0 +1,13 @@
+@import '../../custom.scss';
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 2rem;
+}
+
+.jumbotron {
+  padding: 2rem;
+  background-color: $gray-700;
+}
