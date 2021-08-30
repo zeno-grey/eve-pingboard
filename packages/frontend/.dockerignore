@@ -1,0 +1,7 @@
+*
+!.docker
+!src/
+!public/
+!.eslintrc.js
+!package.json
+!tsconfig.json
