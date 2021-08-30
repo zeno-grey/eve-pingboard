@@ -1,5 +1,6 @@
-import { Container, Nav, Navbar } from 'react-bootstrap'
+import { Button, Container, Nav, Navbar } from 'react-bootstrap'
 import { useHistory } from 'react-router-dom'
+import { useAccount } from '../hooks/use-account'
 
 export interface NavPage {
   href: string
@@ -11,6 +12,7 @@ export interface AppNavProps {
 }
 
 export function AppNav(props: AppNavProps): JSX.Element {
+  const account = useAccount()
   const history = useHistory()
   const navigateTo = (href: string) => (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     e.preventDefault()
@@ -30,6 +32,15 @@ export function AppNav(props: AppNavProps): JSX.Element {
                 </Nav.Link>
               ))}
             </Nav>
+            {account.loading
+              ? <Navbar.Text>Loading…</Navbar.Text>
+              : account.account?.isLoggedIn
+                ? <>
+                    <Navbar.Text>{account.account.character.name}</Navbar.Text>
+                    <Button onClick={account.logout}>Log Out</Button>
+                  </>
+                : <Button onClick={navigateTo('/login')} href="/login">Log In</Button>
+            }
           </Navbar.Collapse>
       </Container>
     </Navbar>
