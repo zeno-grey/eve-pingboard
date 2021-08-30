@@ -39,5 +39,5 @@ RUN yarn workspaces focus --production --all
 # The built application code is copied after installing the dependencies so we
 # don't run the install process every time we change something in the code
 # without touching the dependencies
-COPY --from=build /app/packages/backend/dist ./packages/backend/dist
+COPY --from=build /app/packages/backend/build ./packages/backend/build
 CMD ["yarn", "workspace", "@ping-board/backend", "start"]
