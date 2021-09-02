@@ -46,4 +46,4 @@ RUN yarn workspaces focus --production --all
 # without touching the dependencies
 COPY --from=build /app/packages/common/build ./packages/common/build
 COPY --from=build /app/packages/backend/build ./packages/backend/build
-CMD ["yarn", "workspace", "@ping-board/backend", "start"]
+CMD ["node", "-r", "./.pnp.cjs", "./packages/backend/build/index.js"]
