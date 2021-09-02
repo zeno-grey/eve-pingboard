@@ -1,6 +1,8 @@
 import Router from '@koa/router'
 import Koa from 'koa'
+import { UserRoles } from '@ping-board/common'
 import { getSessionMiddleware, SessionProvider } from './middleware/session'
+import { getUserRolesMiddleware } from './middleware/user-roles'
 import { NeucoreClient } from './neucore'
 import { getRouter as getApiRouter } from './routes/api'
 import { getRouter as getAuthRouter } from './routes/auth'
@@ -11,6 +13,7 @@ export function getApp(options: {
   eveSsoClient: EveSSOClient,
   neucoreClient: NeucoreClient,
   sessionProvider: SessionProvider,
+  neucoreToUserRolesMapping: Map<string, UserRoles[]>,
 }): Koa {
   const app = new Koa()
   if (options.cookieSigningKeys && options.cookieSigningKeys.length > 0) {
@@ -24,6 +27,7 @@ export function getApp(options: {
     sessionCookieName: 'pingboard-session',
     sessionProvider: options.sessionProvider,
   }))
+  app.use(getUserRolesMiddleware(options))
 
   const apiRouter = getApiRouter()
   const authRouter = getAuthRouter(options)

@@ -2,6 +2,7 @@ import { getApp } from './app'
 import { NeucoreClient } from './neucore'
 import { EveSSOClient } from './sso/eve-sso-client'
 import { InMemorySessionProvider } from './util/in-memory-session-provider'
+import { UserRoles } from '@ping-board/common'
 
 async function main() {
   const eveSsoClient = new EveSSOClient({
@@ -21,11 +22,17 @@ async function main() {
 
   const cookieSigningKeys = process.env.COOKIE_KEY?.split(' ')
 
+  const neucoreToUserRolesMapping = new Map<string, UserRoles[]>([
+    ['brave', [UserRoles.EVENTS_READ]],
+    ['pingboard.admin', [UserRoles.EVENTS_READ, UserRoles.EVENTS_WRITE]],
+  ])
+
   const app = getApp({
     cookieSigningKeys,
     eveSsoClient,
     neucoreClient,
     sessionProvider,
+    neucoreToUserRolesMapping,
   })
 
   const port = process.env.PORT ?? '3000'

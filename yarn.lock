@@ -2073,6 +2073,7 @@ __metadata:
   resolution: "@ping-board/backend@workspace:packages/backend"
   dependencies:
     "@koa/router": ^10.1.1
+    "@ping-board/common": "workspace:packages/common"
     "@types/http-errors": ^1
     "@types/jsonwebtoken": ^8
     "@types/koa": ^2
@@ -2094,6 +2095,17 @@ __metadata:
     ts-node-dev: ^1.1.8
     typescript: ~4.3.5
     uuid: ^8.3.2
+  languageName: unknown
+  linkType: soft
+
+"@ping-board/common@workspace:packages/common":
+  version: 0.0.0-use.local
+  resolution: "@ping-board/common@workspace:packages/common"
+  dependencies:
+    "@types/eslint": ^7
+    "@typescript-eslint/eslint-plugin": ^4.29.3
+    eslint: ^7.32.0
+    typescript: ^4.1.2
   languageName: unknown
   linkType: soft
 
