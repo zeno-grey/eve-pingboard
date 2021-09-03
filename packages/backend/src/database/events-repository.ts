@@ -1,4 +1,5 @@
 import { ApiEventEntry, ApiEventEntryInput } from '@ping-board/common'
+import { NotFound } from 'http-errors'
 import { Knex } from 'knex'
 import { Events, Systems } from './models'
 
@@ -76,6 +77,29 @@ export class EventsRepository {
       return await this.getEvent(inserted[0])
     }
     throw new Error('failed to add event')
+  }
+
+  async setEvent(
+    id: number, timer: ApiEventEntryInput, characterName: string
+  ): Promise<ApiEventEntry> {
+    const updateCount = await this.knex('events')
+      .where({ id })
+      .update({
+        system: timer.system,
+        priority: timer.priority,
+        structure: timer.structure,
+        type: timer.type,
+        standing: timer.standing,
+        event_time: new Date(timer.time),
+        result: timer.result,
+        notes: timer.notes,
+        updated_by: characterName,
+        updated_at: new Date(),
+      })
+    if (updateCount < 1) {
+      throw new NotFound()
+    }
+    return await this.getEvent(id)
   }
 }
 

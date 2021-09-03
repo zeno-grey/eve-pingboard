@@ -37,6 +37,17 @@ export function getRouter(options: {
     ctx.status = 201
   })
 
+  router.put('/:eventId', userRoles.requireOneOf(UserRoles.EVENTS_WRITE), async ctx => {
+    const eventId = extractQueryParam(ctx, 'eventId', parseInt)
+    if (!eventId || !Number.isFinite(eventId) || eventId < 0) {
+      throw new BadRequest()
+    }
+    const event = await validateEventInput(ctx.request.body)
+    const characterName = ctx.session?.character?.name ?? ''
+    const response = await options.events.setEvent(eventId, event, characterName)
+    ctx.body = response
+  })
+
   return router
 }
 
