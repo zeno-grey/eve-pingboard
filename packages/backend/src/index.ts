@@ -1,4 +1,5 @@
 import { getApp } from './app'
+import { knexInstance, EventsRepository } from './database'
 import { NeucoreClient } from './neucore'
 import { EveSSOClient } from './sso/eve-sso-client'
 import { InMemorySessionProvider } from './util/in-memory-session-provider'
@@ -22,6 +23,8 @@ async function main() {
 
   const cookieSigningKeys = process.env.COOKIE_KEY?.split(' ')
 
+  const knex = await knexInstance()
+  const events = new EventsRepository(knex)
   const neucoreToUserRolesMapping = new Map<string, UserRoles[]>([
     ['brave', [UserRoles.EVENTS_READ]],
     ['pingboard.admin', [UserRoles.EVENTS_READ, UserRoles.EVENTS_WRITE]],
@@ -32,6 +35,7 @@ async function main() {
     eveSsoClient,
     neucoreClient,
     sessionProvider,
+    events,
     neucoreToUserRolesMapping,
   })
 

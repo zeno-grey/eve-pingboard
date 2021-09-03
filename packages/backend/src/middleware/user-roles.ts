@@ -1,6 +1,7 @@
 import { Forbidden, Unauthorized } from 'http-errors'
 import { Middleware } from 'koa'
 import { UserRoles } from '@ping-board/common'
+export { UserRoles }
 
 declare module 'koa' {
   interface BaseContext extends Readonly<SessionContext> { }
