@@ -1,4 +1,4 @@
-export interface ApiEventEntry {
+export interface ApiEventEntryInput {
   system: string
   priority: string
   structure: string
@@ -7,6 +7,9 @@ export interface ApiEventEntry {
   time: string
   result: string
   notes: string
+}
+
+export interface ApiEventEntry extends ApiEventEntryInput {
   id: number
   constellation: string
   region: string

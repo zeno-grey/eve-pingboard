@@ -1,5 +1,6 @@
 import Router from '@koa/router'
 import Koa from 'koa'
+import bodyParser from 'koa-bodyparser'
 import { UserRoles } from '@ping-board/common'
 import { EventsRepository } from './database'
 import { getSessionMiddleware, SessionProvider } from './middleware/session'
@@ -30,6 +31,7 @@ export function getApp(options: {
     sessionProvider: options.sessionProvider,
   }))
   app.use(getUserRolesMiddleware(options))
+  app.use(bodyParser({ enableTypes: ['json'] }))
 
   const apiRouter = getApiRouter(options)
   const authRouter = getAuthRouter(options)

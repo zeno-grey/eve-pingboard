@@ -1,5 +1,7 @@
 import Router from '@koa/router'
-import { ApiEventsResponse } from '@ping-board/common'
+import { BadRequest } from 'http-errors'
+import * as yup from 'yup'
+import { ApiEventEntryInput, ApiEventsResponse } from '@ping-board/common'
 import { userRoles, UserRoles } from '../../middleware/user-roles'
 import { EventsRepository } from '../../database'
 import { Context } from 'koa'
@@ -28,7 +30,35 @@ export function getRouter(options: {
     ctx.body = response
   })
 
+  router.post('/', userRoles.requireOneOf(UserRoles.EVENTS_WRITE), async ctx => {
+    const event = await validateEventInput(ctx.request.body)
+    const response = await options.events.addEvent(event, ctx.session?.character?.name ?? '')
+    ctx.body = response
+    ctx.status = 201
+  })
+
   return router
+}
+
+const eventSchema = yup.object().noUnknown(true).shape({
+  system: yup.string().required(),
+  priority: yup.string().required(),
+  structure: yup.string().required(),
+  type: yup.string().required(),
+  standing: yup.string().required(),
+  time: yup.date().required(),
+  result: yup.string().required(),
+  notes: yup.string().min(0),
+})
+
+async function validateEventInput(
+  raw: unknown
+): Promise<ApiEventEntryInput> {
+  const isValid = await eventSchema.isValid(raw)
+  if (isValid) {
+    return eventSchema.cast(raw) as unknown as ApiEventEntryInput
+  }
+  throw new BadRequest('invalid input')
 }
 
 function extractQueryParamDate(ctx: Context, name: string): Date | null {

@@ -1,4 +1,4 @@
-import { ApiEventEntry } from '@ping-board/common'
+import { ApiEventEntry, ApiEventEntryInput } from '@ping-board/common'
 import { Knex } from 'knex'
 import { Events, Systems } from './models'
 
@@ -43,6 +43,39 @@ export class EventsRepository {
       return count[0].count
     }
     return 0
+  }
+
+  async getEvent(id: number): Promise<ApiEventEntry> {
+    const event = await this.knex('events')
+      .select('*')
+      .leftJoin('systems', 'events.system', 'systems.name')
+      .where('id', id)
+
+    if (event.length > 0) {
+      return rawToEvent(event[0])
+    }
+    throw new Error('not found')
+  }
+
+  async addEvent(timer: ApiEventEntryInput, characterName: string): Promise<ApiEventEntry> {
+    const inserted = await this.knex('events')
+      .insert({
+        system: timer.system,
+        event_time: new Date(timer.time),
+        notes: timer.notes,
+        priority: timer.priority,
+        result: timer.result,
+        standing: timer.standing,
+        structure: timer.structure,
+        type: timer.type,
+        updated_by: characterName,
+        updated_at: new Date(),
+      })
+
+    if (inserted.length > 0) {
+      return await this.getEvent(inserted[0])
+    }
+    throw new Error('failed to add event')
   }
 }
 
