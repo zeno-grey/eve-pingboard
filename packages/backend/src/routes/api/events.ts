@@ -48,6 +48,15 @@ export function getRouter(options: {
     ctx.body = response
   })
 
+  router.delete('/:eventId', userRoles.requireOneOf(UserRoles.EVENTS_WRITE), async ctx => {
+    const eventId = extractQueryParam(ctx, 'eventId', parseInt)
+    if (!eventId || !Number.isFinite(eventId) || eventId < 0) {
+      throw new BadRequest()
+    }
+    await options.events.deleteEvent(eventId)
+    ctx.status = 204
+  })
+
   return router
 }
 

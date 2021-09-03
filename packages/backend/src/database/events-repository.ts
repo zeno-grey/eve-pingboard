@@ -101,6 +101,13 @@ export class EventsRepository {
     }
     return await this.getEvent(id)
   }
+
+  async deleteEvent(id: number): Promise<void> {
+    const deleteCount = await this.knex('events').delete().where({ id })
+    if (deleteCount < 1) {
+      throw new NotFound()
+    }
+  }
 }
 
 function rawToEvent(raw: Events & Systems): ApiEventEntry {
