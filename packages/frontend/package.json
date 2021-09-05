@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ping-board/common": "workspace:packages/common",
     "@reduxjs/toolkit": "^1.6.1",
     "bootstrap": "^5.1.0",
     "dayjs": "^1.10.6",
@@ -13,6 +14,7 @@
     "react-router-dom": "^5.2.1"
   },
   "devDependencies": {
+    "@craco/craco": "^6.2.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
@@ -38,10 +40,10 @@
     "typescript": "^4.1.2"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
+    "eject": "craco eject"
   },
   "eslintConfig": {
     "extends": [

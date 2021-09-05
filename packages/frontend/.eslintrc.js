@@ -19,6 +19,7 @@ module.exports = {
   ignorePatterns: [
     'build',
     '.eslintrc.js',
+    'craco.config.js',
     'src/setupProxy.js',
   ],
 }

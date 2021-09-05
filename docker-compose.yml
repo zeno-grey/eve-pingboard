@@ -30,7 +30,7 @@ services:
     environment:
       NODE_ENV: "production"
       COOKIE_KEY: "change me in production!"
-      DB_URL: "mysql://pingboard:pingboard@localhost/pingboard"
+      DB_URL: "mysql://pingboard:pingboard@mariadb/pingboard"
       SSO_CLIENT_ID:
       SSO_CLIENT_SECRET:
       SSO_REDIRECT_URI: "http://localhost:3000/auth/callback"

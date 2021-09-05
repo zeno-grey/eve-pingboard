@@ -1666,6 +1666,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@craco/craco@npm:^6.2.0":
+  version: 6.2.0
+  resolution: "@craco/craco@npm:6.2.0"
+  dependencies:
+    cross-spawn: ^7.0.0
+    lodash: ^4.17.15
+    semver: ^7.3.2
+    webpack-merge: ^4.2.2
+  peerDependencies:
+    react-scripts: ^4.0.0
+  bin:
+    craco: bin/craco.js
+  checksum: 51fb534a3e1a3cefdf2722201d532457c47a58a93e19115ad9ae6ea731ee4cd468e4a63959e5f793cc320b87557b2ef5ead76b4af0df955075a8d37aae2bc26d
+  languageName: node
+  linkType: hard
+
 "@cspotcode/source-map-consumer@npm:0.8.0":
   version: 0.8.0
   resolution: "@cspotcode/source-map-consumer@npm:0.8.0"
@@ -2117,6 +2133,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ping-board/frontend@workspace:packages/frontend"
   dependencies:
+    "@craco/craco": ^6.2.0
+    "@ping-board/common": "workspace:packages/common"
     "@reduxjs/toolkit": ^1.6.1
     "@testing-library/jest-dom": ^5.11.4
     "@testing-library/react": ^11.1.0
@@ -16713,6 +16731,15 @@ typescript@~4.3.5:
   peerDependencies:
     webpack: 2 || 3 || 4
   checksum: ed1387774031a59bc1bd5f79150e7a49dcf5048a6d5e9652672637bed7f93df6220cbd88b2e371e7c8c8e7640b3a8ed6895f771c6b05a8bb90b721f82001ac25
+  languageName: node
+  linkType: hard
+
+"webpack-merge@npm:^4.2.2":
+  version: 4.2.2
+  resolution: "webpack-merge@npm:4.2.2"
+  dependencies:
+    lodash: ^4.17.15
+  checksum: ce58bc8ab53a3dd5d9a0df65684571349eef53372bf8f224521072110485391335b26ab097c5f07829b88d0c146056944149566e5a953f05997b0fe2cbaf8dd6
   languageName: node
   linkType: hard
 

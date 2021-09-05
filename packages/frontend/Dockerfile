@@ -6,8 +6,11 @@ WORKDIR /app
 COPY .yarnrc.yml ./
 COPY .yarn ./.yarn
 COPY tsconfig.json ./
+COPY packages/common/tsconfig.json ./packages/common/
 COPY packages/frontend/tsconfig.json packages/frontend/.yarnrc.yml ./packages/frontend/
+COPY .eslintrc.json ./
 COPY package.json ./
+COPY packages/common/package.json ./packages/common/
 COPY packages/frontend/package.json ./packages/frontend/
 COPY yarn.lock ./
 # Install all dependencies
@@ -15,7 +18,7 @@ RUN yarn install
 # The source code is copied after installing the dependencies so we don't
 # run the install process every time we change something in the code without
 # touching the dependencies
-COPY .eslintrc.json ./
+COPY packages/common packages/common
 COPY packages/frontend packages/frontend
 RUN yarn workspace @ping-board/frontend build
 
