@@ -16,6 +16,7 @@ export class EventsRepository {
     let query = this.knex('events')
       .select('*')
       .leftJoin('systems', 'events.system', 'systems.name')
+      .orderBy('event_time', options.after ? 'asc' : 'desc')
     if (options.before) {
       query = query.where('event_time', '<', options.before)
     }
