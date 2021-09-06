@@ -1,4 +1,6 @@
 import {
+  ApiEventEntry,
+  ApiEventEntryInput,
   ApiEventsResponse,
   ApiMeResponse,
 } from '@ping-board/common'
@@ -26,6 +28,14 @@ export const apiSlice = createApi({
         ? [...result.events.map(({ id }) => ({ type: 'Event' as const, id }))]
         : ['Event'],
     }),
+    addEvent: builder.mutation<ApiEventEntry, ApiEventEntryInput>({
+      query: event => ({ url: 'api/events', method: 'POST', body: event }),
+      invalidatesTags: ['Event'],
+    }),
+    updateEvent: builder.mutation<ApiEventEntry, { id: number, event: ApiEventEntryInput }>({
+      query: ({ id, event }) => ({ url: `api/events/${id}`, method: 'PUT', body: event }),
+      invalidatesTags: ['Event'],
+    }),
   }),
 })
 
@@ -39,4 +49,6 @@ export const {
   useGetUserQuery,
   useLogOutMutation,
   useGetEventsQuery,
+  useAddEventMutation,
+  useUpdateEventMutation,
 } = apiSlice

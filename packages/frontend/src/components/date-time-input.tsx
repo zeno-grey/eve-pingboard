@@ -1,15 +1,16 @@
 import { ChangeEvent, useEffect } from 'react'
 import { useState } from 'react'
-import { Col, Form, Row } from 'react-bootstrap'
+import { Col, Form, Row, RowProps } from 'react-bootstrap'
 import { Dayjs, dayjs } from '../utils/dayjs'
 
-export interface DateTimeInputProps {
+export interface DateTimeInputProps extends Omit<RowProps, 'onChange'> {
   value: Date | string | Dayjs
   onChange: (date: Dayjs) => void
 }
 export function DateTimeInput({
   value: date,
   onChange,
+  ...rowProps
 }: DateTimeInputProps): JSX.Element {
   const dateFormat = 'YYYY-MM-DD'
   const timeFormat = 'HH:mm'
@@ -77,7 +78,7 @@ export function DateTimeInput({
   }
 
   return (
-    <Row>
+    <Row {...rowProps}>
       <Form.Group as={Col} controlId="date" xs={6} className="mb-3">
         <Form.Label>Date ({dateFormat})</Form.Label>
         <Form.Control

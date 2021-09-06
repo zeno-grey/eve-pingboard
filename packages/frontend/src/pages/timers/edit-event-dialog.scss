@@ -1,0 +1,9 @@
+@import '../../custom.scss';
+
+.time-mode-input {
+  transition: $transition-fade;
+}
+
+.inactive-time-mode {
+  opacity: 0.7;
+}

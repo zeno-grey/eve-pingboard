@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useState } from 'react'
-import { Col, Form, Row } from 'react-bootstrap'
+import { Col, Form, Row, RowProps } from 'react-bootstrap'
 import { dayjs, Duration, DurationUnitsObjectType } from '../utils/dayjs'
 
 interface DurationComponent {
@@ -14,7 +14,7 @@ const defaultDurationComponents: DurationComponent[] = [
   { label: 'Minutes', unit: 'minutes', format: 'mm' },
 ]
 
-export interface RelativeTimeInputProps {
+export interface RelativeTimeInputProps extends Omit<RowProps, 'onChange'> {
   value: Duration
   onChange: (value: Duration) => void
   durationComponents?: DurationComponent[]
@@ -23,6 +23,7 @@ export function RelativeTimeInput({
   value: duration,
   onChange,
   durationComponents = defaultDurationComponents,
+  ...rowProps
 }: RelativeTimeInputProps): JSX.Element {
   const durationFromTexts = (texts: string[]) => dayjs.duration(Object.fromEntries(
     durationComponents.map(({ unit }, i) => {
@@ -60,7 +61,7 @@ export function RelativeTimeInput({
   }
 
   return (
-    <Row>
+    <Row {...rowProps}>
       {durationComponents.map(({ label }, i) => (
         <Form.Group key={label} as={Col} xs={12 / durationComponents.length}>
           <Form.Label>{label}</Form.Label>
