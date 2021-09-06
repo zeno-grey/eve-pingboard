@@ -4,6 +4,7 @@ import { Button, Container } from 'react-bootstrap'
 import { Redirect } from 'react-router-dom'
 import {
   useAddEventMutation,
+  useDeleteEventMutation,
   useGetEventsQuery,
   useGetUserQuery,
   useUpdateEventMutation,
@@ -20,6 +21,7 @@ export function TimersPage(): JSX.Element {
   const pastEvents = useGetEventsQuery({ before: now })
   const [addEvent] = useAddEventMutation()
   const [updateEvent] = useUpdateEventMutation()
+  const [deleteEvent] = useDeleteEventMutation()
 
   const canEdit = me.data?.isLoggedIn && me.data.character.roles.includes(UserRoles.EVENTS_WRITE)
 
@@ -38,6 +40,14 @@ export function TimersPage(): JSX.Element {
       updateEvent({ id: eventDialogState.event.id, event })
     }
     cancelEdit()
+  }
+  const deleteEditedEvent = () => {
+    const { event } = eventDialogState
+    if (!event) {
+      return
+    }
+    deleteEvent(event.id)
+    setEventDialogState({ event: null, show: false })
   }
 
   return (
@@ -71,6 +81,7 @@ export function TimersPage(): JSX.Element {
         event={eventDialogState.event}
         onCancel={cancelEdit}
         onSave={confirmEditEvent}
+        onDelete={deleteEditedEvent}
       />
     </Container>
   )

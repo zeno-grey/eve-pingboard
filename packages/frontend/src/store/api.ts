@@ -36,6 +36,10 @@ export const apiSlice = createApi({
       query: ({ id, event }) => ({ url: `api/events/${id}`, method: 'PUT', body: event }),
       invalidatesTags: ['Event'],
     }),
+    deleteEvent: builder.mutation<void, number>({
+      query: id => ({ url: `api/events/${id}`, method: 'DELETE' }),
+      invalidatesTags: (result, _, arg) => result ? [{ type: 'Event', id: arg }] : ['Event'],
+    }),
   }),
 })
 
@@ -51,4 +55,5 @@ export const {
   useGetEventsQuery,
   useAddEventMutation,
   useUpdateEventMutation,
+  useDeleteEventMutation,
 } = apiSlice

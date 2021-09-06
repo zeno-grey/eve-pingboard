@@ -39,12 +39,14 @@ export interface EditEventDialogProps {
   event?: ApiEventEntry | null
   onSave?: (event: ApiEventEntryInput) => void
   onCancel?: () => void
+  onDelete?: () => void
 }
 export function EditEventDialog({
   show,
   event,
   onSave,
   onCancel,
+  onDelete,
 }: EditEventDialogProps): JSX.Element {
   const [editedEvent, setEditedEvent] = useState<EditedEvent>(getDefaultEditedEvent())
   useEffect(() => setEditedEvent(event
@@ -119,6 +121,11 @@ export function EditEventDialog({
   type ValueKeys<T, V> = { [K in keyof T]: T[K] extends V ? T[K] : never }
   const handleSelectValueChange = <T extends keyof ValueKeys<EditedEvent, string>>(field: T) =>
     (e: ChangeEvent<HTMLSelectElement>) => setEventField(field, e.target.value as EditedEvent[T])
+
+  const [isDeletePending, setIsDeletePending] = useState(false)
+  const handleStartDelete = () => setIsDeletePending(true)
+  const handleCancelDelete = () => setIsDeletePending(false)
+  const handleConfirmDelete = () => onDelete?.()
 
   return (
     <Modal show={show} size="lg" backdrop="static">
@@ -276,13 +283,43 @@ export function EditEventDialog({
           </Row>
         </Form>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button variant="primary" disabled={!canSave} onClick={save}>
-          Save
-        </Button>
+      <Modal.Footer className="edit-timer-dialog-footer">
+        <div className={clsx('edit-timer-dialog-buttons-wrapper', isDeletePending && 'hidden')}>
+          {!isNewEvent && (
+            <>
+              <Button
+                variant="danger"
+                disabled={isDeletePending}
+                onClick={handleStartDelete}
+              >
+                Delete
+              </Button>
+              <div className="edit-timer-dialog-buttons-spacer" />
+            </>
+          )}
+          <Button variant="secondary" onClick={onCancel} disabled={isDeletePending}>
+            Cancel
+          </Button>
+          <Button variant="primary" disabled={!canSave || isDeletePending} onClick={save}>
+            Save
+          </Button>
+        </div>
+        {!isNewEvent && (
+          <div className={clsx(
+            'edit-timer-confirm-delete-buttons-wrapper',
+            !isDeletePending && 'hidden'
+          )}>
+            <Button disabled={!isDeletePending} onClick={handleCancelDelete}>
+              No
+            </Button>
+            <div className="edit-timer-dialog-buttons-spacer">
+              Are you sure you want to delete the event?
+            </div>
+            <Button variant="danger" disabled={!isDeletePending} onClick={handleConfirmDelete}>
+              Yes
+            </Button>
+          </div>
+        )}
       </Modal.Footer>
     </Modal>
   )
