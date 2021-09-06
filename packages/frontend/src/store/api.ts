@@ -1,4 +1,5 @@
 import {
+  ApiEventsResponse,
   ApiMeResponse,
 } from '@ping-board/common'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/dist/query/react'
@@ -17,6 +18,14 @@ export const apiSlice = createApi({
       query: () => ({ url: 'auth/logout', method: 'POST' }),
       invalidatesTags: ['User', 'Event'],
     }),
+
+    /* Events */
+    getEvents: builder.query<ApiEventsResponse, GetEventsOptions>({
+      query: params => ({ url: 'api/events', params }),
+      providesTags: (result) => result && result.events.length > 0
+        ? [...result.events.map(({ id }) => ({ type: 'Event' as const, id }))]
+        : ['Event'],
+    }),
   }),
 })
 
@@ -29,4 +38,5 @@ export interface GetEventsOptions {
 export const {
   useGetUserQuery,
   useLogOutMutation,
+  useGetEventsQuery,
 } = apiSlice
