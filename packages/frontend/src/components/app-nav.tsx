@@ -1,6 +1,6 @@
 import { Button, Container, Nav, Navbar } from 'react-bootstrap'
 import { useHistory } from 'react-router-dom'
-import { useAccount } from '../hooks/use-account'
+import { useGetUserQuery, useLogOutMutation } from '../store'
 
 export interface NavPage {
   href: string
@@ -12,18 +12,22 @@ export interface AppNavProps {
 }
 
 export function AppNav(props: AppNavProps): JSX.Element {
-  const account = useAccount()
   const history = useHistory()
   const navigateTo = (href: string) => (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     e.preventDefault()
     history.push(href)
   }
 
+  const user = useGetUserQuery()
+  const [logout, { isLoading: isLoggingOut }] = useLogOutMutation()
+
+  const isLoading = user.isFetching || isLoggingOut
+
   return (
     <Navbar variant="dark" bg="primary" expand="lg">
       <Container fluid>
         <Navbar.Brand href="/">Brave Collective Pingboard</Navbar.Brand>
-        <Navbar.Toggle aria-controle="navbar-nav" />
+        <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav" className="justify-content-end">
             <Nav variant="pills" className="me-auto">
               {props.pages.map(page => (
@@ -32,12 +36,12 @@ export function AppNav(props: AppNavProps): JSX.Element {
                 </Nav.Link>
               ))}
             </Nav>
-            {account.loading
+            {isLoading
               ? <Navbar.Text>Loading…</Navbar.Text>
-              : account.account?.isLoggedIn
+              : user.data?.isLoggedIn
                 ? <>
-                    <Navbar.Text>{account.account.character.name}</Navbar.Text>
-                    <Button onClick={account.logout}>Log Out</Button>
+                    <Navbar.Text>{user.data.character.name}</Navbar.Text>
+                    <Button onClick={() => logout()}>Log Out</Button>
                   </>
                 : <Button onClick={navigateTo('/login')} href="/login">Log In</Button>
             }
