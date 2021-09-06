@@ -38,8 +38,8 @@ export function getRouter(options: {
   })
 
   router.put('/:eventId', userRoles.requireOneOf(UserRoles.EVENTS_WRITE), async ctx => {
-    const eventId = extractQueryParam(ctx, 'eventId', parseInt)
-    if (!eventId || !Number.isFinite(eventId) || eventId < 0) {
+    const eventId = parseInt(ctx.params['eventId'])
+    if (!Number.isFinite(eventId) || eventId < 0) {
       throw new BadRequest()
     }
     const event = await validateEventInput(ctx.request.body)
@@ -49,8 +49,8 @@ export function getRouter(options: {
   })
 
   router.delete('/:eventId', userRoles.requireOneOf(UserRoles.EVENTS_WRITE), async ctx => {
-    const eventId = extractQueryParam(ctx, 'eventId', parseInt)
-    if (!eventId || !Number.isFinite(eventId) || eventId < 0) {
+    const eventId = parseInt(ctx.params['eventId'])
+    if (!Number.isFinite(eventId) || eventId < 0) {
       throw new BadRequest()
     }
     await options.events.deleteEvent(eventId)
