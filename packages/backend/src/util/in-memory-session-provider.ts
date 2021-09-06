@@ -47,7 +47,7 @@ export class InMemorySessionProvider implements SessionProvider {
   private cleanup(): void {
     const now = Date.now()
     for (const [sessionId, { expiresAt }] of this.sessionStore) {
-      if (expiresAt.getTime() >= now) {
+      if (expiresAt.getTime() < now) {
         this.sessionStore.delete(sessionId)
       }
     }
