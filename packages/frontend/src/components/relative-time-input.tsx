@@ -39,9 +39,9 @@ export function RelativeTimeInput({
   const [inputTexts, setInputTexts] = useState(textsFromDuration(duration))
 
   useEffect(() => {
-    const inputDuration = durationFromTexts(inputTexts)
-
-    if (inputDuration.asMilliseconds() !== duration.asMilliseconds()) {
+    const inputDuration = textsFromDuration(durationFromTexts(inputTexts))
+    const propDuration = textsFromDuration(duration)
+    if (inputDuration.some((c, i) => c !== propDuration[i])) {
       setInputTexts(textsFromDuration(duration))
     }
   // We only want to run this when the duration prop changes, not when the input fields change
