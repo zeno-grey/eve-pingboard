@@ -1,10 +1,12 @@
 import { ApiEventEntry } from '@ping-board/common'
+import clsx from 'clsx'
 import dayjs from 'dayjs'
 import { Button, Table } from 'react-bootstrap'
 import { RegionLink } from '../../components/region-link'
 import { RelativeTime } from '../../components/relative-time'
 import { SolarSystemLink } from '../../components/solar-system-link'
 import { Time } from '../../components/time'
+import './events-table.scss'
 
 export interface EventsTableProps {
   showResultColumn?: boolean
@@ -18,10 +20,19 @@ export function EventsTable({
   onEdit,
   events,
 }: EventsTableProps): JSX.Element {
+  const getRowClass = (event: ApiEventEntry): string => {
+    const time = Date.parse(event.time)
+    const now = Date.now()
+    if (Math.abs(time - now) < 1000 * 60 * 60) {
+      return 'present'
+    }
+    return time > now ? 'future' : 'past'
+  }
+
   return (
-    <Table hover size="sm" variant="dark" responsive>
+    <Table hover size="sm" variant="dark" responsive className="events-table">
       <thead>
-        <tr>
+        <tr className="events-header-row">
           <th>System</th>
           <th>Region</th>
           <th>Priority</th>
@@ -45,7 +56,7 @@ export function EventsTable({
           </tr>
         )}
         {events.map(event => (
-          <tr key={event.id}>
+          <tr key={event.id} className={clsx('event-row', getRowClass(event))}>
             <th scope="row"><SolarSystemLink system={event.system} /></th>
             <td><RegionLink system={event.system} region={event.region} /></td>
             <td>{event.priority}</td>
@@ -58,10 +69,12 @@ export function EventsTable({
             {showResultColumn && (
               <td>{event.result}</td>
             )}
-            <td>{event.notes}</td>
+            <td className="event-notes">{event.notes}</td>
             {canEdit && (
               <td>
-                <Button onClick={() => onEdit?.(event)}>Edit</Button>
+                <Button size="sm" onClick={() => onEdit?.(event)}>
+                  <i className="bi-pencil" /> Edit
+                </Button>
               </td>
             )}
           </tr>

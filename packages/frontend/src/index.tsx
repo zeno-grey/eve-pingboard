@@ -4,6 +4,7 @@ import { Provider } from 'react-redux'
 import { store } from './store'
 import App from './app'
 import './index.css'
+import 'bootstrap-icons/font/bootstrap-icons.css'
 
 ReactDOM.render(
   <React.StrictMode>

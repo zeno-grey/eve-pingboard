@@ -1,0 +1,38 @@
+@import '../../custom.scss';
+
+.events-table {
+  font-size: 0.9rem;
+}
+
+.events-header-row {
+  & > * {
+    white-space: nowrap;
+  }
+}
+
+.event-row {
+  & * {
+    white-space: nowrap;
+  }
+  & .event-notes {
+    white-space: normal;
+  }
+
+  &.future {
+    & > * {
+      background-color: $cyan-800 !important;
+    }
+    & a {
+      color: $cyan-200;
+    }
+  }
+
+  &.present {
+    & > * {
+      background-color: $red-800 !important;
+    }
+    & a {
+      color: $red-400;
+    }
+  }
+}

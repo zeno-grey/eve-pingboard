@@ -1,6 +1,15 @@
+@import '../../custom.scss';
+
 .timers-header {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  margin: .5rem 0;
+  margin: 0.75rem ($grid-gutter-width * -0.5) 0.25rem;
+
+  & > * {
+    margin: 0 ($grid-gutter-width * 0.5);
+  }
+  & > .btn {
+    margin-bottom: 0.5rem;
+  }
 }

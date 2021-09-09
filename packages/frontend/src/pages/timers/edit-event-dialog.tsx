@@ -125,7 +125,10 @@ export function EditEventDialog({
   const [isDeletePending, setIsDeletePending] = useState(false)
   const handleStartDelete = () => setIsDeletePending(true)
   const handleCancelDelete = () => setIsDeletePending(false)
-  const handleConfirmDelete = () => onDelete?.()
+  const handleConfirmDelete = () => {
+    setIsDeletePending(false)
+    onDelete?.()
+  }
 
   return (
     <Modal show={show} size="lg" backdrop="static">

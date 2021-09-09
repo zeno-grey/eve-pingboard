@@ -6,6 +6,7 @@
     "@ping-board/common": "workspace:packages/common",
     "@reduxjs/toolkit": "^1.6.1",
     "bootstrap": "^5.1.0",
+    "bootstrap-icons": "^1.5.0",
     "clsx": "^1.1.1",
     "dayjs": "^1.10.6",
     "react": "^17.0.2",
