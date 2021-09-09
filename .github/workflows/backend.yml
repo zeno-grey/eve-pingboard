@@ -13,8 +13,20 @@ on:
       - 'main'
 
 jobs:
+  lint:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: actions/setup-node@v2.4.0
+        with:
+          node-version: '14'
+          cache: yarn
+      - run: yarn workspaces focus ping-board @ping-board/backend
+      - run: yarn workspace @ping-board/backend lint
+
   build-docker:
     runs-on: ubuntu-18.04
+    needs: lint
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.4
@@ -47,3 +59,51 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.output.labels }}
+
+  build:
+    runs-on: ubuntu-18.04
+    needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v2.4.0
+        with:
+          node-version: '14'
+          cache: yarn
+
+      - name: Install Dependencies
+        run: yarn workspaces focus @ping-board/backend
+
+      - name: Build
+        run: yarn workspace @ping-board/backend build
+
+      - name: Remove Dev-Dependencies
+        run: |
+          rm -rf ./.yarn/cache
+          rm -rf ./.pnp.cjs
+          yarn workspaces focus --production @ping-board/backend
+
+      - name: Upload Release Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: backend
+          path: |
+            .pnp.cjs
+            .yarn
+            packages/backend/build
+            packages/common/build
+            LICENSE
+
+      # - name: Zip Release Files
+      #   run: |
+      #     zip -r backend-release.zip \
+      #       .yarn packages/{backend,common}/{build,package.json} \
+      #       .pnp.cjs .yarnrc.yml package.json yarn.lock LICENSE
+
+      # - name: Upload Release Artifact
+      #   uses: actions/upload-artifact@v2.2.4
+      #   with:
+      #     name: backend
+      #     path: backend-release.zip

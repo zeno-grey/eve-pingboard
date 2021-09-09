@@ -2124,6 +2124,7 @@ __metadata:
   dependencies:
     "@types/eslint": ^7
     "@typescript-eslint/eslint-plugin": ^4.29.3
+    "@typescript-eslint/parser": ^4.29.3
     eslint: ^7.32.0
     typescript: ^4.1.2
   languageName: unknown
@@ -2150,6 +2151,7 @@ __metadata:
     "@types/sass": ^1
     "@types/testing-library__jest-dom": ^5
     "@typescript-eslint/eslint-plugin": ^4.29.3
+    "@typescript-eslint/parser": ^4.29.3
     bootstrap: ^5.1.0
     bootstrap-icons: ^1.5.0
     clsx: ^1.1.1
