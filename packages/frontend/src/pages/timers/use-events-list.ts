@@ -15,10 +15,13 @@ export interface UseEventsListResult {
   hasMoreEvents: boolean
   loadMoreEvents: () => void
   reloadEvents: () => void
-  // handleEventChanged: (event: ApiEventEntry) => void
-  // handleEventDeleted: (eventId: number) => void
 }
-export function useEventsList(): UseEventsListResult {
+export interface UseEventsListOptions {
+  skip?: boolean
+}
+export function useEventsList({
+  skip,
+}: UseEventsListOptions = {}): UseEventsListResult {
   const dispatch = useAppDispatch()
   const events = useAppSelector(selectEvents)
   const loading = useAppSelector(selectIsLoadingEvents)
@@ -27,7 +30,11 @@ export function useEventsList(): UseEventsListResult {
   const loadMore = () => dispatch(loadMoreEvents())
   const reload = () => dispatch(reloadEvents())
 
-  useEffect(() => { dispatch(reloadEvents()) }, [dispatch])
+  useEffect(() => {
+    if (skip !== true) {
+      dispatch(reloadEvents())
+    }
+  }, [dispatch, skip])
 
   return {
     events,

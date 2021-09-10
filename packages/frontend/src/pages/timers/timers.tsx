@@ -16,7 +16,10 @@ import { useEventsList } from './use-events-list'
 export function TimersPage(): JSX.Element {
   const me = useGetUserQuery()
 
-  const eventsList = useEventsList()
+  const canEdit = me.data?.isLoggedIn && me.data.character.roles.includes(UserRoles.EVENTS_WRITE)
+  const canRead = me.data?.isLoggedIn && me.data.character.roles.includes(UserRoles.EVENTS_READ)
+
+  const eventsList = useEventsList({ skip: me.isLoading || !canRead })
 
   const [addEvent, addEventState] = useAddEventMutation()
   const [updateEvent, updateEventState] = useUpdateEventMutation()
@@ -39,8 +42,6 @@ export function TimersPage(): JSX.Element {
       setSaveState(null)
     }
   }, [addEventState, deleteEventState, eventsList, saveState, updateEventState])
-
-  const canEdit = me.data?.isLoggedIn && me.data.character.roles.includes(UserRoles.EVENTS_WRITE)
 
   const [eventDialogState, setEventDialogState] = useState({
     event: null as ApiEventEntry | null,
@@ -70,10 +71,21 @@ export function TimersPage(): JSX.Element {
     cancelEdit()
   }
 
+  if (!me.isFetching) {
+    if (!me.data?.isLoggedIn) {
+      return <Redirect to="/login" />
+    }
+    if (!canRead) {
+      return (
+        <Container fluid>
+          <h6>Sorry, you don&apos;t have permission to view this page.</h6>
+        </Container>
+      )
+    }
+  }
+
   return (
     <Container fluid>
-      {!me.isFetching && !me.data?.isLoggedIn && <Redirect to="/login"  />}
-
       <div className="timers-header">
         <h3>Timers</h3>
         <Button onClick={eventsList.reloadEvents} disabled={isSaving}>
