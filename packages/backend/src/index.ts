@@ -25,10 +25,16 @@ async function main() {
 
   const knex = await knexInstance()
   const events = new EventsRepository(knex)
-  const neucoreToUserRolesMapping = new Map<string, UserRoles[]>([
-    ['brave', [UserRoles.EVENTS_READ]],
-    ['pingboard.admin', [UserRoles.EVENTS_READ, UserRoles.EVENTS_WRITE]],
-  ])
+
+  const groupsByRole: [UserRoles, string | undefined][] = [
+    [UserRoles.EVENTS_READ, process.env.GROUPS_READ_EVENTS],
+    [UserRoles.EVENTS_WRITE, process.env.GROUPS_WRITE_EVENTS],
+  ]
+  const neucoreToUserRolesMapping = groupsByRole.reduce(
+    (byGroup, [role, groups]) => (groups ?? '').split(' ')
+      .reduce((byGroup, group) => byGroup.set(group, [...byGroup.get(group) ?? [], role]), byGroup)
+    , new Map<string, UserRoles[]>()
+  )
 
   const app = getApp({
     cookieSigningKeys,
