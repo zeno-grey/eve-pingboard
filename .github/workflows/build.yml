@@ -1,0 +1,199 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  lint:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: actions/setup-node@v2.4.0
+        with:
+          node-version: '14'
+          cache: yarn
+      - run: yarn install
+      - run: yarn workspace @ping-board/common lint
+      - run: yarn workspace @ping-board/backend lint
+      - run: yarn workspace @ping-board/frontend lint
+
+  build-backend-docker:
+    runs-on: ubuntu-18.04
+    needs: lint
+    if: startsWith(github.ref, 'refs/tags/') # Only run for Tags
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+
+      - name: Docker Metadata action
+        id: meta
+        uses: docker/metadata-action@v3.5.0
+        with:
+          images: ghcr.io/${{ github.repository }}-backend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1.10.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v2.7.0
+        with:
+          context: .
+          file: ./packages/backend/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.output.labels }}
+
+  build-backend:
+    runs-on: ubuntu-18.04
+    needs: lint
+    if: startsWith(github.ref, 'refs/tags/') # Only run for Tags
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v2.4.0
+        with:
+          node-version: '14'
+          cache: yarn
+
+      - name: Install Dependencies
+        run: yarn workspaces focus @ping-board/backend
+
+      - name: Build
+        run: yarn workspace @ping-board/backend build
+
+      - name: Remove Dev-Dependencies
+        run: |
+          rm -rf ./.yarn/cache
+          rm -rf ./.pnp.cjs
+          yarn workspaces focus --production @ping-board/backend
+
+      - name: Upload Release Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: backend
+          path: |
+            .pnp.cjs
+            .yarn
+            package.json
+            packages/backend/build
+            packages/common/package.json
+            packages/common/build
+            packages/common/package.json
+            LICENSE
+
+  build-frontend-docker:
+    runs-on: ubuntu-18.04
+    needs: lint
+    if: startsWith(github.ref, 'refs/tags/') # Only run for Tags
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+
+      - name: Docker Metadata action
+        id: meta
+        uses: docker/metadata-action@v3.5.0
+        with:
+          images: ghcr.io/${{ github.repository }}-frontend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1.10.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v2.7.0
+        with:
+          context: .
+          file: ./packages/frontend/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.output.labels }}
+
+  build-frontend:
+    runs-on: ubuntu-18.04
+    needs: lint
+    if: startsWith(github.ref, 'refs/tags/') # Only run for Tags
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2.4.0
+        with:
+          node-version: '14'
+          cache: yarn
+
+      - name: Install Dependencies
+        run: yarn workspaces focus ping-board @ping-board/frontend
+
+      - name: Build
+        run: yarn workspace @ping-board/frontend build
+
+      - name: Upload Release Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: frontend
+          path: packages/frontend/build
+
+  release:
+    runs-on: ubuntu-18.04
+    needs:
+      - build-backend
+      - build-frontend
+    if: startsWith(github.ref, 'refs/tags/') # Only run for Tags
+    steps:
+      - name: Download Backend Build Artifact
+        uses: actions/download-artifact@v2.0.10
+        with:
+          name: backend
+          path: backend
+
+      - name: Zip Backend Files
+        run: zip -r ../backend.zip .
+        working-directory: backend
+
+      - name: Download Frontend Build Artifact
+        uses: actions/download-artifact@v2.0.10
+        with:
+          name: frontend
+          path: frontend
+
+      - name: Zip Frontend Files
+        run: zip -r ../frontend.zip .
+        working-directory: frontend
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v0.1.12
+        with:
+          files: |
+            backend.zip
+            frontend.zip
