@@ -46,6 +46,7 @@
     "start": "craco start",
     "build": "yarn workspace @ping-board/common build && craco build",
     "test": "craco test",
+    "lint": "yarn workspace @ping-board/common build && yarn run eslint .",
     "eject": "craco eject"
   },
   "eslintConfig": {
