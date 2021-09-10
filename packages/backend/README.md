@@ -85,6 +85,14 @@ CORE_APP_ID
 CORE_APP_TOKEN
 ```
 
+### User Permission/Role configuration
+```sh
+# A list of space-separated neucore groups that are allowed to read events/timers
+GROUPS_READ_EVENTS
+# A list of space-separated neucore groups that are allowed to add/edit/delete events/timers
+GROUPS_WRITE_EVENTS
+```
+
 ## Database setup
 The application supports both MariaDB and MySQL (via [mysql2](https://www.npmjs.com/package/mysql2) and [knex.js](https://www.npmjs.com/package/knex)).
 

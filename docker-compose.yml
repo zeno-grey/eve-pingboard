@@ -37,6 +37,8 @@ services:
       CORE_URL:
       CORE_APP_ID:
       CORE_APP_TOKEN:
+      GROUPS_READ_EVENTS:
+      GROUPS_WRITE_EVENTS:
     labels:
       traefik.enable: "true"
       traefik.http.routers.pingboard-backend.entrypoints: web
