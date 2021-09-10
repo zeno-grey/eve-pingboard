@@ -14,7 +14,7 @@ COPY packages/common/package.json ./packages/common/
 COPY packages/frontend/package.json ./packages/frontend/
 COPY yarn.lock ./
 # Install all dependencies
-RUN yarn install
+RUN yarn workspaces focus ping-board @ping-board/frontend
 # The source code is copied after installing the dependencies so we don't
 # run the install process every time we change something in the code without
 # touching the dependencies

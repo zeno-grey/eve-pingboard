@@ -7,6 +7,26 @@
 !yarn.lock
 
 !.eslintrc.json
-!packages/**/*
 !package.json
 !tsconfig.json
+
+!packages/backend/src
+!packages/backend/.eslintrc.js
+!packages/backend/package.json
+!packages/backend/tsconfig.eslint.json
+!packages/backend/tsconfig.json
+
+!packages/common/src
+!packages/common/.eslintrc.js
+!packages/common/package.json
+!packages/common/tsconfig.eslint.json
+!packages/common/tsconfig.json
+
+!packages/frontend/.docker
+!packages/frontend/public
+!packages/frontend/src
+!packages/frontend/.eslintrc.js
+!packages/frontend/.yarnrc.yml
+!packages/frontend/craco.config.js
+!packages/frontend/package.json
+!packages/frontend/tsconfig.json

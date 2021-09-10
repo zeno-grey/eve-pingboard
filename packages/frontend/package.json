@@ -44,7 +44,7 @@
   },
   "scripts": {
     "start": "craco start",
-    "build": "craco build",
+    "build": "yarn workspace @ping-board/common build && craco build",
     "test": "craco test",
     "eject": "craco eject"
   },
