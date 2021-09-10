@@ -59,3 +59,28 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.output.labels }}
+
+  build:
+    runs-on: ubuntu-18.04
+    needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2.4.0
+        with:
+          node-version: '14'
+          cache: yarn
+
+      - name: Install Dependencies
+        run: yarn workspaces focus ping-board @ping-board/frontend
+
+      - name: Build
+        run: yarn workspace @ping-board/frontend build
+
+      - name: Upload Release Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: backend
+          path: packages/frontend/build
