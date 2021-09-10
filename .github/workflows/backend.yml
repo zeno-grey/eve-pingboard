@@ -27,6 +27,7 @@ jobs:
   build-docker:
     runs-on: ubuntu-18.04
     needs: lint
+    if: ${{ startsWith(github.ref, 'refs/tags/') }} # Only run for Tags
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.4
@@ -63,6 +64,7 @@ jobs:
   build:
     runs-on: ubuntu-18.04
     needs: lint
+    if: ${{ startsWith(github.ref, 'refs/tags/') }} # Only run for Tags
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.4
@@ -95,15 +97,3 @@ jobs:
             packages/backend/build
             packages/common/build
             LICENSE
-
-      # - name: Zip Release Files
-      #   run: |
-      #     zip -r backend-release.zip \
-      #       .yarn packages/{backend,common}/{build,package.json} \
-      #       .pnp.cjs .yarnrc.yml package.json yarn.lock LICENSE
-
-      # - name: Upload Release Artifact
-      #   uses: actions/upload-artifact@v2.2.4
-      #   with:
-      #     name: backend
-      #     path: backend-release.zip
