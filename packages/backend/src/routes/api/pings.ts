@@ -2,16 +2,20 @@ import Router from '@koa/router'
 import { BadRequest, Forbidden, InternalServerError, NotFound, Unauthorized } from 'http-errors'
 import * as yup from 'yup'
 import {
+  ApiNeucoreGroupsResponse,
   ApiPingInput,
   ApiPingTemplateInput,
   ApiPingTemplatesResponse,
+  ApiSlackChannelsResponse,
 } from '@ping-board/common'
 import { UserRoles, userRoles } from '../../middleware/user-roles'
 import { SlackClient, SlackRequestFailedError } from '../../slack/slack-client'
+import { NeucoreClient } from '../../neucore'
 import { dayjs } from '../../util/dayjs'
 import { PingsRepository, UnknownTemplateError } from '../../database'
 
 export function getRouter(options: {
+  neucoreClient: NeucoreClient,
   slackClient: SlackClient,
   pings: PingsRepository,
 }): Router {
@@ -60,6 +64,28 @@ export function getRouter(options: {
       throw error
     }
   })
+
+  router.get('/channels', userRoles.requireOneOf(UserRoles.PING_TEMPLATES_WRITE), async ctx => {
+    const channels = await options.slackClient.getChannels()
+    const response: ApiSlackChannelsResponse = {
+      channels: channels.flatMap(c => typeof c.id === 'string' && typeof c.name === 'string'
+        ? [{ id: c.id, name: c.name }]
+        : []
+      ),
+    }
+    ctx.body = response
+  })
+
+  router.get('/neucore-groups',
+    userRoles.requireOneOf(UserRoles.PING_TEMPLATES_WRITE),
+    async ctx => {
+      const appInfo = await options.neucoreClient.getAppInfo()
+      const response: ApiNeucoreGroupsResponse = {
+        neucoreGroups: appInfo.groups,
+      }
+      ctx.body = response
+    }
+  )
 
   router.get('/templates', userRoles.requireOneOf(UserRoles.PING), async ctx => {
     const templates = await options.pings.getPingTemplates()

@@ -1,4 +1,5 @@
 import { LogLevel, WebClient } from '@slack/web-api'
+import { Channel } from '@slack/web-api/dist/response/ConversationsListResponse'
 
 export class InvalidChannelIdError extends Error {
   constructor(id: string) {
@@ -19,6 +20,29 @@ export class SlackClient {
     this.client = new WebClient(token, {
       logLevel: LogLevel.DEBUG,
     })
+  }
+
+  async getChannels(): Promise<Channel[]> {
+    let channels: Channel[] = []
+    let cursor: string | undefined
+    do {
+      const page = await this.client.conversations.list({
+        types: [
+          'public_channel',
+          'private_channel',
+        ].join(','),
+        exclude_archived: true,
+        cursor,
+      })
+      if (page.ok && page.channels) {
+        channels = [...channels, ...page.channels]
+      } else {
+        throw new Error(`Error querying slack channels: ${page.error ?? 'unknown error'}`)
+      }
+      cursor = page.response_metadata?.next_cursor
+    } while (cursor)
+
+    return channels.sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))
   }
 
   async getChannelName(channelId: string): Promise<string> {

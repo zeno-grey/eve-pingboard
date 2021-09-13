@@ -1,5 +1,6 @@
 import fetch, { Response } from 'node-fetch'
 import { Group } from './types'
+import { NeucoreApplicationInfo } from './types'
 
 /**
  * Thrown when there was an issue getting a response from Neucore.
@@ -80,5 +81,9 @@ export class NeucoreClient {
    */
   async getCharacterGroups(characterId: number): Promise<Group[]> {
     return this.get(`/app/v2/groups/${characterId}`)
+  }
+
+  async getAppInfo(): Promise<NeucoreApplicationInfo> {
+    return this.get('/app/v1/show')
   }
 }

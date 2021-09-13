@@ -41,3 +41,18 @@ export interface Alliance {
   ticker: string
   groups: Group[]
 }
+
+/** Response returned Neucore's /app/v1/show endpoint. */
+export interface NeucoreApplicationInfo {
+  id: number
+  name: string
+  roles: string[]
+  groups: Group[]
+  eveLogins: Array<{
+    id: number
+    name: string
+    description: string
+    esiScopes: string
+    eveRoles: string[]
+  }>
+}
