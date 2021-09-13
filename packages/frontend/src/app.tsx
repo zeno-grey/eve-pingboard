@@ -3,12 +3,13 @@ import './app.css'
 import './custom.scss'
 import { AppNav, NavPage } from './components/app-nav'
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom'
-import { LoginPage, TimersPage } from './pages'
+import { LoginPage, PingsPage, TimersPage } from './pages'
 import { AppFooter } from './components/app-footer'
 
 export default function App(): JSX.Element {
   const pages: { href: string, title?: string, component: () => JSX.Element }[] = [
     { href: '/timers', title: 'Timers', component: TimersPage },
+    { href: '/pings', title: 'Pings', component: PingsPage },
     { href: '/login', component: LoginPage },
   ]
   const navPages: NavPage[] = pages.filter(

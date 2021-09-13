@@ -3,13 +3,15 @@ import {
   ApiEventEntryInput,
   ApiEventsResponse,
   ApiMeResponse,
+  ApiPingInput,
+  ApiPingTemplatesResponse,
 } from '@ping-board/common'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/dist/query/react'
 
 export const apiSlice = createApi({
   reducerPath: 'loginApi',
   baseQuery: fetchBaseQuery({ baseUrl: '/', credentials: 'same-origin' }),
-  tagTypes: ['User', 'Event'],
+  tagTypes: ['User', 'Event', 'PingTemplate'],
   endpoints: builder => ({
     /* User Management */
     getUser: builder.query<ApiMeResponse, void>({
@@ -40,6 +42,17 @@ export const apiSlice = createApi({
       query: id => ({ url: `api/events/${id}`, method: 'DELETE' }),
       invalidatesTags: (result, _, arg) => result ? [{ type: 'Event', id: arg }] : ['Event'],
     }),
+
+    /* Pings */
+    postPing: builder.mutation<void, ApiPingInput>({
+      query: ping => ({ url: 'api/pings', method: 'POST', body: ping }),
+    }),
+    getPingTemplates: builder.query<ApiPingTemplatesResponse, void>({
+      query: () => ({ url: 'api/pings/templates' }),
+      providesTags: (result) => result && result.templates.length > 0
+        ? [...result.templates.map(({ id }) => ({ type: 'PingTemplate' as const, id }))]
+        : ['PingTemplate'],
+    }),
   }),
 })
 
@@ -52,8 +65,12 @@ export interface GetEventsOptions {
 export const {
   useGetUserQuery,
   useLogOutMutation,
+
   useGetEventsQuery,
   useAddEventMutation,
   useUpdateEventMutation,
   useDeleteEventMutation,
+
+  usePostPingMutation,
+  useGetPingTemplatesQuery,
 } = apiSlice
