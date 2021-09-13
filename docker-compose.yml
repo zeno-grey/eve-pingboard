@@ -34,6 +34,7 @@ services:
       SSO_CLIENT_ID:
       SSO_CLIENT_SECRET:
       SSO_REDIRECT_URI: "http://localhost:3000/auth/callback"
+      SLACK_TOKEN:
       CORE_URL:
       CORE_APP_ID:
       CORE_APP_TOKEN:

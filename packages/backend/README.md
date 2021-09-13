@@ -61,7 +61,7 @@ DB_URL
 ```
 
 ### Eve SSO configuration
-(as obtained via https://developers.eveonline.com/applications)
+As obtained via https://developers.eveonline.com/applications
 ```sh
 # The Client ID of the registered Eve application
 SSO_CLIENT_ID
@@ -73,6 +73,13 @@ SSO_CLIENT_SECRET
 # if you mount the application behind a reverse proxy and under a subpath, it
 # may also be something like https://example.com/pingboard/auth/callback.
 SSO_REDIRECT_URI
+```
+
+### Slack configuration
+As obtained via https://api.slack.com/apps
+```sh
+# The Slack App's Bot User OAuth Token (starts with xoxb-)
+SLACK_TOKEN
 ```
 
 ### Neucore configuration

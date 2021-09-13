@@ -2,20 +2,23 @@ import Router from '@koa/router'
 import Koa from 'koa'
 import bodyParser from 'koa-bodyparser'
 import { UserRoles } from '@ping-board/common'
-import { EventsRepository } from './database'
+import { EventsRepository, PingsRepository } from './database'
 import { getSessionMiddleware, SessionProvider } from './middleware/session'
 import { getUserRolesMiddleware } from './middleware/user-roles'
 import { NeucoreClient } from './neucore'
 import { getRouter as getApiRouter } from './routes/api'
 import { getRouter as getAuthRouter } from './routes/auth'
 import { EveSSOClient } from './sso/eve-sso-client'
+import { SlackClient } from './slack/slack-client'
 
 export function getApp(options: {
-  cookieSigningKeys?: string[],
   eveSsoClient: EveSSOClient,
   neucoreClient: NeucoreClient,
+  slackClient: SlackClient,
   sessionProvider: SessionProvider,
+  cookieSigningKeys?: string[],
   events: EventsRepository,
+  pings: PingsRepository,
   neucoreToUserRolesMapping: Map<string, UserRoles[]>,
 }): Koa {
   const app = new Koa()

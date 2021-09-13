@@ -18,6 +18,22 @@ No matter how you plan on running Pingboard, you at least need to create a new E
 3. Click "Create Application" and write down the application's client ID and secret key.
    You'll need them when configuring the backend server.
 
+### Create a new Slack Application
+1.  Go to https://api.slack.com/apps
+2.  Click the "Create New App" button
+3.  Select "From Scratch"
+4.  Enter a name for your app (this will also be the name displayed as the sender of pings on Slack)
+5.  Select the workspace you want to use the App in (you'll need to be logged into the workspace first for this to work)
+6.  Click "Create App"
+7.  In the menu on the left, select "OAuth & Permissions"
+8.  Scroll down to the "Scopes" section and under "Bot Token Scopes", click "Add an OAuth Scope"
+9.  Add the `channels:read`, `chat:write` and `chat:write.public` scopes.
+    Those are required to list all public channels, list private channels the app is invited to and to send posts to those channels.
+10. Scroll back up and click the "Install to Workspace" button.
+    This will take you to your workspace and asks you to grant the scopes you just configured.
+11. Click "Allow"
+12. You are redirected back to the "OAuth & Permissions" page of your App. Write down the "Bot User OAuth Token" (starting with `xoxb-`).
+
 ### Create a Neucore Application
 1. As an admin, log into your Neucore instance
 2. Click the Plus icon on the Administration → Apps page
@@ -63,6 +79,7 @@ Replace all values with your configuration.
 SSO_CLIENT_ID="the Eve application's client ID" \
 SSO_CLIENT_SECRET="the Eve application's secret key" \
 SSO_REDIRECT_URI="the Eve application's callback URL" \
+SLACK_TOKEN="the Slack App's Bot User OAuth Token" \
 CORE_URL="the URL where your Neucore instance can be reached by the backend" \
 CORE_APP_ID="the Neucore app's numerical ID" \
 CORE_APP_TOKEN="the Neucore app's secret token" \
@@ -93,6 +110,7 @@ DB_URL="your database connection string" \
 SSO_CLIENT_ID="the Eve application's client ID" \
 SSO_CLIENT_SECRET="the Eve application's secret key" \
 SSO_REDIRECT_URI="the Eve application's callback URL" \
+SLACK_TOKEN="the Slack App's Bot User OAuth Token" \
 CORE_URL="the URL where your Neucore instance can be reached by the backend" \
 CORE_APP_ID="the Neucore app's numerical ID" \
 CORE_APP_TOKEN="the Neucore app's secret token" \

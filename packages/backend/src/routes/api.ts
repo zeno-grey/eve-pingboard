@@ -1,10 +1,14 @@
 import Router from '@koa/router'
 import { ApiMeResponse } from '@ping-board/common'
-import { EventsRepository } from '../database'
+import { SlackClient } from '../slack/slack-client'
+import { EventsRepository, PingsRepository } from '../database'
 import { getRouter as getEventRouter } from './api/events'
+import { getRouter as getPingsRouter } from './api/pings'
 
 export function getRouter(options: {
+  slackClient: SlackClient,
   events: EventsRepository,
+  pings: PingsRepository,
 }): Router {
   const router = new Router()
 
@@ -23,8 +27,11 @@ export function getRouter(options: {
     ctx.body = response
   })
 
-  const apiRouter = getEventRouter(options)
-  router.use('/events', apiRouter.routes(), apiRouter.allowedMethods())
+  const eventsRouter = getEventRouter(options)
+  router.use('/events', eventsRouter.routes(), eventsRouter.allowedMethods())
+
+  const pingsRouter = getPingsRouter(options)
+  router.use('/pings', pingsRouter.routes(), pingsRouter.allowedMethods())
 
   return router
 }
