@@ -1,5 +1,5 @@
 import fetch, { Response } from 'node-fetch'
-import { Group } from './types'
+import { NeucoreGroup } from '@ping-board/common'
 import { NeucoreApplicationInfo } from './types'
 
 /**
@@ -79,7 +79,7 @@ export class NeucoreClient {
    * Queries the character's user's groups from Neucore.
    * Throws a NeucoreResponseError with status code 404 if neucore does not know the character.
    */
-  async getCharacterGroups(characterId: number): Promise<Group[]> {
+  async getCharacterGroups(characterId: number): Promise<NeucoreGroup[]> {
     return this.get(`/app/v2/groups/${characterId}`)
   }
 

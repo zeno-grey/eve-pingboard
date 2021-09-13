@@ -1,7 +1,8 @@
 import { UserRoles } from '@ping-board/common'
 import { Container } from 'react-bootstrap'
-import { Redirect } from 'react-router-dom'
+import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useGetUserQuery } from '../../store'
+import { ManagePings } from './manage-pings'
 import { SendPings } from './send-pings'
 import './pings.scss'
 
@@ -9,6 +10,10 @@ export function PingsPage(): JSX.Element {
   const me = useGetUserQuery()
 
   const canRead = me.data?.isLoggedIn && me.data.character.roles.includes(UserRoles.PING)
+  const canEdit = me.data?.isLoggedIn &&
+    me.data.character.roles.includes(UserRoles.PING_TEMPLATES_WRITE)
+
+  const { path, url } = useRouteMatch()
 
   if (!me.isFetching) {
     if (!me.data?.isLoggedIn) {
@@ -25,10 +30,25 @@ export function PingsPage(): JSX.Element {
 
   return (
     <Container>
-      <div className="pings-header">
-        <h3>Send Pings</h3>
-      </div>
-      <SendPings />
+      <Switch>
+        <Route exact path={path}>
+          <div className="pings-header">
+            <h3>Send Pings</h3>
+            <div style={{ flex: 1 }} />
+            {canEdit &&
+              <Link to={`${url}/manage`} className="btn btn-primary" role="button">
+                <i className="bi-wrench" /> Manage Ping Templates
+              </Link>
+            }
+          </div>
+          <SendPings />
+        </Route>
+        {canEdit &&
+          <Route path={`${path}/manage`}>
+            <ManagePings />
+          </Route>
+        }
+      </Switch>
     </Container>
   )
 }

@@ -1,11 +1,4 @@
-/** A Neucore group. */
-export interface Group {
-  id: number
-  name: string
-  description?: string | null
-  visibility: 'public' | 'private'
-  autoAccept: boolean
-}
+import { NeucoreGroup } from '@ping-board/common'
 
 /** A character as obtained from Neucore. */
 export interface Character {
@@ -29,7 +22,7 @@ export interface Corporation {
   name: string
   ticker: string
   alliance: Alliance
-  groups: Group[]
+  groups: NeucoreGroup[]
   trackingLastUpdate: string
   autoAllowlist: true
 }
@@ -39,7 +32,7 @@ export interface Alliance {
   id: number
   name: string
   ticker: string
-  groups: Group[]
+  groups: NeucoreGroup[]
 }
 
 /** Response returned Neucore's /app/v1/show endpoint. */
@@ -47,7 +40,7 @@ export interface NeucoreApplicationInfo {
   id: number
   name: string
   roles: string[]
-  groups: Group[]
+  groups: NeucoreGroup[]
   eveLogins: Array<{
     id: number
     name: string

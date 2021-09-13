@@ -3,15 +3,19 @@ import {
   ApiEventEntryInput,
   ApiEventsResponse,
   ApiMeResponse,
+  ApiNeucoreGroupsResponse,
   ApiPingInput,
+  ApiPingTemplate,
+  ApiPingTemplateInput,
   ApiPingTemplatesResponse,
+  ApiSlackChannelsResponse,
 } from '@ping-board/common'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/dist/query/react'
 
 export const apiSlice = createApi({
   reducerPath: 'loginApi',
   baseQuery: fetchBaseQuery({ baseUrl: '/', credentials: 'same-origin' }),
-  tagTypes: ['User', 'Event', 'PingTemplate'],
+  tagTypes: ['User', 'Event', 'PingTemplate', 'PingChannel', 'NeucoreGroup'],
   endpoints: builder => ({
     /* User Management */
     getUser: builder.query<ApiMeResponse, void>({
@@ -47,11 +51,42 @@ export const apiSlice = createApi({
     postPing: builder.mutation<void, ApiPingInput>({
       query: ping => ({ url: 'api/pings', method: 'POST', body: ping }),
     }),
+    getPingChannels: builder.query<ApiSlackChannelsResponse, void>({
+      query: () => ({ url: 'api/pings/channels' }),
+      providesTags: result => result && result.channels.length > 0
+        ? [...result.channels.map(({ id }) => ({ type: 'PingChannel' as const, id }))]
+        : ['PingChannel'],
+    }),
+    getAvailableNeucoreGroups: builder.query<ApiNeucoreGroupsResponse, void>({
+      query: () => ({ url: 'api/pings/neucore-groups' }),
+      providesTags: result => result && result.neucoreGroups.length > 0
+        ? [...result.neucoreGroups.map(({ id }) => ({ type: 'NeucoreGroup' as const, id }))]
+        : ['NeucoreGroup'],
+    }),
     getPingTemplates: builder.query<ApiPingTemplatesResponse, void>({
       query: () => ({ url: 'api/pings/templates' }),
       providesTags: (result) => result && result.templates.length > 0
         ? [...result.templates.map(({ id }) => ({ type: 'PingTemplate' as const, id }))]
         : ['PingTemplate'],
+    }),
+    addPingTemplate: builder.mutation<ApiPingTemplate, ApiPingTemplateInput>({
+      query: template => ({ url: 'api/pings/templates', method: 'POST', body: template }),
+      invalidatesTags: ['PingTemplate'],
+    }),
+    updatePingTemplate: builder
+      .mutation<ApiPingTemplate, { id: number, template: ApiPingTemplateInput }>({
+        query: ({ id, template }) => ({
+          url: `api/pings/templates/${id}`,
+          method: 'PUT',
+          body: template,
+        }),
+        invalidatesTags: result =>
+          result ? [{ type: 'PingTemplate', id: result.id }] : ['PingTemplate'],
+    }),
+    deletePingTemplate: builder.mutation<void, number>({
+      query: id => ({ url: `api/pings/templates/${id}`, method: 'DELETE' }),
+      invalidatesTags: (result, _, arg) =>
+        result ? [{ type: 'PingTemplate', id: arg }] : ['PingTemplate'],
     }),
   }),
 })
@@ -72,5 +107,10 @@ export const {
   useDeleteEventMutation,
 
   usePostPingMutation,
+  useGetPingChannelsQuery,
+  useGetAvailableNeucoreGroupsQuery,
   useGetPingTemplatesQuery,
+  useAddPingTemplateMutation,
+  useUpdatePingTemplateMutation,
+  useDeletePingTemplateMutation,
 } = apiSlice

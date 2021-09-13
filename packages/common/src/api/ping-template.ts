@@ -1,3 +1,5 @@
+import { NeucoreGroup } from '..'
+
 export interface ApiPingTemplateInput {
   name: string
   slackChannelId: string
@@ -14,4 +16,8 @@ export interface ApiPingTemplate extends ApiPingTemplateInput {
 
 export interface ApiPingTemplatesResponse {
   templates: ApiPingTemplate[]
+}
+
+export interface ApiNeucoreGroupsResponse {
+  neucoreGroups: NeucoreGroup[]
 }
