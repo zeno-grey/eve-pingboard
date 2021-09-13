@@ -1,14 +1,15 @@
 import Router from '@koa/router'
-import { BadRequest, Forbidden, InternalServerError, Unauthorized } from 'http-errors'
+import { BadRequest, Forbidden, InternalServerError, NotFound, Unauthorized } from 'http-errors'
 import * as yup from 'yup'
 import {
   ApiPingInput,
+  ApiPingTemplateInput,
   ApiPingTemplatesResponse,
 } from '@ping-board/common'
 import { UserRoles, userRoles } from '../../middleware/user-roles'
 import { SlackClient, SlackRequestFailedError } from '../../slack/slack-client'
 import { dayjs } from '../../util/dayjs'
-import { PingsRepository } from '../../database'
+import { PingsRepository, UnknownTemplateError } from '../../database'
 
 export function getRouter(options: {
   slackClient: SlackClient,
@@ -78,6 +79,66 @@ export function getRouter(options: {
     ctx.body = response
   })
 
+  router.post('/templates', userRoles.requireOneOf(UserRoles.PING_TEMPLATES_WRITE), async ctx => {
+    const template = await validateTemplateInput(ctx.request.body)
+    const channelName = await options.slackClient.getChannelName(template.slackChannelId)
+    const createdTemplate = await options.pings.addPingTemplate({
+      input: {
+        ...template,
+        slackChannelName: channelName,
+      },
+      characterName: ctx.session?.character?.name ?? '',
+    })
+    ctx.body = createdTemplate
+  })
+
+  router.put('/templates/:templateId',
+    userRoles.requireOneOf(UserRoles.PING_TEMPLATES_WRITE),
+    async ctx => {
+      const templateId = parseInt(ctx.params['templateId'] ?? '', 10)
+      if (!isFinite(templateId)) {
+        throw new BadRequest(`invalid templateId: ${ctx.params['templateId']}`)
+      }
+      const template = await validateTemplateInput(ctx.request.body)
+      const channelName = await options.slackClient.getChannelName(template.slackChannelId)
+      try {
+        const updatedTemplate = await options.pings.setPingTemplate({
+          id: templateId,
+          template: {
+            ...template,
+            slackChannelName: channelName,
+          },
+          characterName: ctx.session?.character?.name ?? '',
+        })
+        ctx.body = updatedTemplate
+      } catch (e) {
+        if (e instanceof UnknownTemplateError) {
+          throw new NotFound()
+        }
+        throw e
+      }
+    }
+  )
+
+  router.delete('/templates/:templateId',
+    userRoles.requireOneOf(UserRoles.PING_TEMPLATES_WRITE),
+    async ctx => {
+      const templateId = parseInt(ctx.params['templateId'] ?? '', 10)
+      if (!isFinite(templateId)) {
+        throw new BadRequest(`invalid templateId: ${ctx.params['templateId']}`)
+      }
+      try {
+        await options.pings.deletePingTemplate({ id: templateId })
+        ctx.status = 204
+      } catch (e) {
+        if (e instanceof UnknownTemplateError) {
+          throw new NotFound()
+        }
+        throw e
+      }
+    }
+  )
+
   return router
 }
 
@@ -91,6 +152,22 @@ async function validatePingInput(
   const isValid = await pingSchema.isValid(raw)
   if (isValid) {
     return pingSchema.cast(raw) as unknown as ApiPingInput
+  }
+  throw new BadRequest('invalid input')
+}
+
+const templateSchema = yup.object().noUnknown(true).shape({
+  name: yup.string().required().min(1),
+  slackChannelId: yup.string().min(1),
+  template: yup.string().min(0),
+  allowedNeucoreGroups: yup.array(yup.string().min(1)).min(0),
+})
+async function validateTemplateInput(
+  raw: unknown
+): Promise<ApiPingTemplateInput> {
+  const isValid = await templateSchema.isValid(raw)
+  if (isValid) {
+    return templateSchema.cast(raw) as unknown as ApiPingTemplateInput
   }
   throw new BadRequest('invalid input')
 }

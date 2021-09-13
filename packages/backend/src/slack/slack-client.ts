@@ -21,6 +21,16 @@ export class SlackClient {
     })
   }
 
+  async getChannelName(channelId: string): Promise<string> {
+    const response = await this.client.conversations.info({
+      channel: channelId,
+    })
+    if (typeof response.channel?.name !== 'string') {
+      throw new InvalidChannelIdError(channelId)
+    }
+    return response.channel.name
+  }
+
   async postMessage(channelId: string, text: string): Promise<void> {
     const response = await this.client.chat.postMessage({
       channel: channelId,

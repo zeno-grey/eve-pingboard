@@ -36,6 +36,7 @@ async function main() {
     [UserRoles.EVENTS_READ, process.env.GROUPS_READ_EVENTS],
     [UserRoles.EVENTS_WRITE, process.env.GROUPS_WRITE_EVENTS],
     [UserRoles.PING, process.env.GROUPS_PING],
+    [UserRoles.PING_TEMPLATES_WRITE, process.env.GROUPS_WRITE_PING_TEMPLATES],
   ]
   const neucoreToUserRolesMapping = groupsByRole.reduce(
     (byGroup, [role, groups]) => (groups ?? '').split(' ')

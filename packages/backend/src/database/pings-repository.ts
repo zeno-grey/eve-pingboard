@@ -1,14 +1,27 @@
-import { ApiPing, ApiPingTemplate } from '@ping-board/common'
+import { ApiPing, ApiPingTemplate, ApiPingTemplateInput } from '@ping-board/common'
 import { Knex } from 'knex'
 import { PingTemplateGroups } from './models/ping-allowed-groups'
 import { PingTemplates } from './models/ping-templates'
 import { Pings } from './models/pings'
+
+export class UnknownTemplateError extends Error {
+  constructor(templateId: number) {
+    super(`could not find a template with id ${templateId}`)
+  }
+}
 
 export class PingCreationFailedError extends Error {
   constructor() {
     super('failed to create ping')
   }
 }
+
+export class TemplateCreationError extends Error {
+  constructor() {
+    super('failed to create template')
+  }
+}
+
 
 export class PingsRepository {
   constructor(
@@ -71,6 +84,109 @@ export class PingsRepository {
       .where({ template_id: template.id })
 
     return rawToPingTemplate(template, templateGroups)
+  }
+
+  async addPingTemplate(options: {
+    input: ApiPingTemplateInput & Pick<ApiPingTemplate, 'slackChannelName'>,
+    characterName: string,
+  }): Promise<ApiPingTemplate> {
+    return await this.knex.transaction(async trx => {
+      const template = await trx('ping_templates')
+        .insert({
+          name: options.input.name,
+          slack_channel_id: options.input.slackChannelId,
+          slack_channel_name: options.input.slackChannelName,
+          template: options.input.template,
+          updated_at: new Date(),
+          updated_by: options.characterName,
+        })
+
+      if (template.length !== 1) {
+        throw new TemplateCreationError()
+      }
+
+      const templateId = template[0]
+      if (options.input.allowedNeucoreGroups.length > 0) {
+        await trx('ping_template_groups')
+          .insert(options.input.allowedNeucoreGroups.map(group => ({
+            template_id: templateId,
+            group,
+          })))
+      }
+
+      const stored = await this.getPingTemplate({ id: templateId, knex: trx })
+      if (!stored) {
+        throw new TemplateCreationError()
+      }
+      return stored
+    })
+  }
+
+  async setPingTemplate(options: {
+    id: number,
+    template: ApiPingTemplateInput & Pick<ApiPingTemplate, 'slackChannelName'>,
+    characterName: string,
+  }): Promise<ApiPingTemplate | null> {
+    return await this.knex.transaction(async trx => {
+      console.log(options)
+
+      // Remove all previously allowed groups
+      await trx('ping_template_groups')
+        .delete()
+        .where({ template_id: options.id })
+
+      const updateCount = await trx('ping_templates')
+        .update({
+          name: options.template.name,
+          slack_channel_id: options.template.slackChannelId,
+          slack_channel_name: options.template.slackChannelName,
+          template: options.template.template,
+          updated_at: new Date(),
+          updated_by: options.characterName,
+        })
+        .where({ id: options.id })
+
+      if (updateCount !== 1) {
+        throw new UnknownTemplateError(options.id)
+      }
+
+      const allowedGroups = await trx('ping_template_groups')
+        .select('*')
+        .where({ template_id: options.id })
+      console.log(allowedGroups)
+
+      if (options.template.allowedNeucoreGroups.length > 0) {
+        await trx('ping_template_groups')
+          .insert(options.template.allowedNeucoreGroups.map(group => ({
+            template_id: options.id,
+            group,
+          })))
+      }
+
+      const stored = await this.getPingTemplate({ id: options.id, knex: trx })
+      if (!stored) {
+        throw new TemplateCreationError()
+      }
+      return stored
+    })
+  }
+
+  async deletePingTemplate(options: {
+    id: number,
+  }): Promise<void> {
+    await this.knex.transaction(async trx => {
+      await trx('ping_template_groups')
+        .delete()
+        .where({ template_id: options.id })
+
+      const deleteCount = await trx('ping_templates')
+        .delete()
+        .where({ id: options.id })
+
+      if (deleteCount < 1) {
+        throw new UnknownTemplateError(options.id)
+      }
+    })
   }
 }
 

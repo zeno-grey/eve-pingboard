@@ -1,11 +1,13 @@
 import Router from '@koa/router'
 import { ApiMeResponse } from '@ping-board/common'
+import { NeucoreClient } from '../neucore'
 import { SlackClient } from '../slack/slack-client'
 import { EventsRepository, PingsRepository } from '../database'
 import { getRouter as getEventRouter } from './api/events'
 import { getRouter as getPingsRouter } from './api/pings'
 
 export function getRouter(options: {
+  neucoreClient: NeucoreClient,
   slackClient: SlackClient,
   events: EventsRepository,
   pings: PingsRepository,
