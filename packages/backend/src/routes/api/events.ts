@@ -1,5 +1,5 @@
 import Router from '@koa/router'
-import { BadRequest } from 'http-errors'
+import { BadRequest, NotFound } from 'http-errors'
 import * as yup from 'yup'
 import { ApiEventEntryInput, ApiEventsResponse } from '@ping-board/common'
 import { userRoles, UserRoles } from '../../middleware/user-roles'
@@ -45,6 +45,9 @@ export function getRouter(options: {
     const event = await validateEventInput(ctx.request.body)
     const characterName = ctx.session?.character?.name ?? ''
     const response = await options.events.setEvent(eventId, event, characterName)
+    if (!response) {
+      throw new NotFound()
+    }
     ctx.body = response
   })
 
@@ -53,7 +56,10 @@ export function getRouter(options: {
     if (!Number.isFinite(eventId) || eventId < 0) {
       throw new BadRequest()
     }
-    await options.events.deleteEvent(eventId)
+    const success = await options.events.deleteEvent(eventId)
+    if (!success) {
+      throw new NotFound()
+    }
     ctx.status = 204
   })
 

@@ -1,5 +1,4 @@
 import { ApiEventEntry, ApiEventEntryInput } from '@ping-board/common'
-import { NotFound } from 'http-errors'
 import { Knex } from 'knex'
 import { Events, Systems } from './models'
 
@@ -82,7 +81,7 @@ export class EventsRepository {
 
   async setEvent(
     id: number, timer: ApiEventEntryInput, characterName: string
-  ): Promise<ApiEventEntry> {
+  ): Promise<null | ApiEventEntry> {
     const updateCount = await this.knex('events')
       .where({ id })
       .update({
@@ -98,16 +97,14 @@ export class EventsRepository {
         updated_at: new Date(),
       })
     if (updateCount < 1) {
-      throw new NotFound()
+      return null
     }
     return await this.getEvent(id)
   }
 
-  async deleteEvent(id: number): Promise<void> {
+  async deleteEvent(id: number): Promise<boolean> {
     const deleteCount = await this.knex('events').delete().where({ id })
-    if (deleteCount < 1) {
-      throw new NotFound()
-    }
+    return deleteCount > 0
   }
 }
 
