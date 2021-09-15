@@ -6,13 +6,18 @@ import {
   ApiPingInput,
   ApiPingTemplateInput,
   ApiPingTemplatesResponse,
+  ApiPingViewPermissions,
+  ApiPingViewPermissionsByGroupInput,
+  ApiPingViewPermissionsByChannelInput,
   ApiSlackChannelsResponse,
+  ApiPingViewPermission,
 } from '@ping-board/common'
 import { UserRoles, userRoles } from '../../middleware/user-roles'
 import { SlackClient, SlackRequestFailedError } from '../../slack/slack-client'
 import { NeucoreClient } from '../../neucore'
 import { dayjs } from '../../util/dayjs'
 import { PingsRepository, UnknownTemplateError } from '../../database'
+import { Channel } from '@slack/web-api/dist/response/ConversationsListResponse'
 
 export function getRouter(options: {
   neucoreClient: NeucoreClient,
@@ -165,6 +170,75 @@ export function getRouter(options: {
     }
   )
 
+  router.get('/view-permissions',
+    userRoles.requireOneOf(UserRoles.PING_TEMPLATES_WRITE),
+    async ctx => {
+      const [viewPermissions, slackChannels] = await Promise.all([
+        options.pings.getPingViewPermissions(),
+        options.slackClient.getChannels(),
+      ])
+      const response = buildApiPingViewPermissionsResponse(viewPermissions, slackChannels)
+      ctx.body = response
+    }
+  )
+
+  router.put('/view-permissions/groups/:group',
+    userRoles.requireOneOf(UserRoles.PING_TEMPLATES_WRITE),
+    async ctx => {
+      const neucoreGroup = ctx.params['group']
+      if (!neucoreGroup) {
+        throw new BadRequest('invalid neucore group')
+      }
+      const appInfo = await options.neucoreClient.getAppInfo()
+      if (!appInfo.groups.some(g => g.name === neucoreGroup)) {
+        throw new BadRequest('invalid neucore group')
+      }
+      const input = await validateViewPermissionsByGroupInput(ctx.request.body)
+      const slackChannels = await options.slackClient.getChannels()
+      const invalidSlackChannels = input.allowedSlackChannelIds
+        .filter(c => !slackChannels.some(sc => sc.id === c))
+      if (invalidSlackChannels.length > 0) {
+        throw new BadRequest(`invalid slack channel id: ${invalidSlackChannels.join(', ')}`)
+      }
+
+      const viewPermissions = await options.pings.setPingViewPermissionsByGroup({
+        neucoreGroup,
+        channelIds: input.allowedSlackChannelIds,
+      })
+      const response = buildApiPingViewPermissionsResponse(viewPermissions, slackChannels)
+      ctx.body = response
+    }
+  )
+
+  router.put('/view-permissions/channels/:channelId',
+    userRoles.requireOneOf(UserRoles.PING_TEMPLATES_WRITE),
+    async ctx => {
+      const channelId = ctx.params['channelId']
+      if (!channelId) {
+        throw new BadRequest('invalid slack channel id')
+      }
+      const slackChannels = await options.slackClient.getChannels()
+      if (!slackChannels.some(c => c.id === channelId)) {
+        throw new BadRequest('invalid slack channel id')
+      }
+
+      const input = await validateViewPermissionsByChannelInput(ctx.request.body)
+      const appInfo = await options.neucoreClient.getAppInfo()
+      const invalidNeucoreGroups = input.allowedNeucoreGroups
+        .filter(g => !appInfo.groups.some(ng => ng.name === g))
+      if (invalidNeucoreGroups.length > 0) {
+        throw new BadRequest(`invalid neucore group: ${invalidNeucoreGroups.join(', ')}`)
+      }
+
+      const viewPermissions = await options.pings.setPingViewPermissionsByChannel({
+        channelId,
+        neucoreGroups: input.allowedNeucoreGroups,
+      })
+      const response = buildApiPingViewPermissionsResponse(viewPermissions, slackChannels)
+      ctx.body = response
+    }
+  )
+
   return router
 }
 
@@ -196,4 +270,41 @@ async function validateTemplateInput(
     return templateSchema.cast(raw) as unknown as ApiPingTemplateInput
   }
   throw new BadRequest('invalid input')
+}
+
+const viewPermissionsByGroupSchema = yup.object().noUnknown(true).shape({
+  allowedSlackChannelIds: yup.array(yup.string().min(1)).min(0),
+})
+async function validateViewPermissionsByGroupInput(
+  raw: unknown
+): Promise<ApiPingViewPermissionsByGroupInput> {
+  if (await viewPermissionsByGroupSchema.isValid(raw)) {
+    return viewPermissionsByGroupSchema.cast(raw) as unknown as ApiPingViewPermissionsByGroupInput
+  }
+  throw new BadRequest('invalid input')
+}
+
+const viewPermissionsByChannelSchema = yup.object().noUnknown(true).shape({
+  allowedNeucoreGroups: yup.array(yup.string().min(1)).min(0),
+})
+async function validateViewPermissionsByChannelInput(
+  raw: unknown
+): Promise<ApiPingViewPermissionsByChannelInput> {
+  if (await viewPermissionsByChannelSchema.isValid(raw)) {
+    return viewPermissionsByChannelSchema
+      .cast(raw) as unknown as ApiPingViewPermissionsByChannelInput
+  }
+  throw new BadRequest('invalid input')
+}
+
+function buildApiPingViewPermissionsResponse(
+  dbResult: Omit<ApiPingViewPermission, 'slackChannelName'>[],
+  slackChannels: Channel[],
+): ApiPingViewPermissions {
+  return {
+    viewPermissions: dbResult.map(p => ({
+      ...p,
+      slackChannelName: slackChannels.find(c => c.id === p.slackChannelId)?.name ?? '',
+    })),
+  }
 }

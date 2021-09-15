@@ -1,7 +1,13 @@
-import { ApiPing, ApiPingTemplate, ApiPingTemplateInput } from '@ping-board/common'
+import {
+  ApiPing,
+  ApiPingTemplate,
+  ApiPingTemplateInput,
+  ApiPingViewPermission,
+} from '@ping-board/common'
 import { Knex } from 'knex'
 import { PingTemplateGroups } from './models/ping-allowed-groups'
 import { PingTemplates } from './models/ping-templates'
+import { PingViewPermissions } from './models/ping-view-permissions'
 import { Pings } from './models/pings'
 
 export class UnknownTemplateError extends Error {
@@ -188,6 +194,49 @@ export class PingsRepository {
       }
     })
   }
+
+  async getPingViewPermissions(): Promise<Omit<ApiPingViewPermission, 'slackChannelName'>[]> {
+    const permissions = await this.knex('ping_view_permissions')
+    return permissions.map(rawToPingViewPermission)
+  }
+
+  async setPingViewPermissionsByChannel(options: {
+    channelId: string,
+    neucoreGroups: string[]
+  }): Promise<Omit<ApiPingViewPermission, 'slackChannelName'>[]> {
+    return await this.knex.transaction(async trx => {
+      await trx('ping_view_permissions')
+        .delete()
+        .where({ slack_channel_id: options.channelId })
+
+      await trx('ping_view_permissions')
+        .insert(options.neucoreGroups.map(g => ({
+          slack_channel_id: options.channelId,
+          neucore_group: g,
+        })))
+
+      return (await trx('ping_view_permissions')).map(rawToPingViewPermission)
+    })
+  }
+
+  async setPingViewPermissionsByGroup(options: {
+    neucoreGroup: string,
+    channelIds: string[]
+  }): Promise<Omit<ApiPingViewPermission, 'slackChannelName'>[]> {
+    return await this.knex.transaction(async trx => {
+      await trx('ping_view_permissions')
+        .delete()
+        .where({ neucore_group: options.neucoreGroup })
+
+      await trx('ping_view_permissions')
+        .insert(options.channelIds.map(c => ({
+          slack_channel_id: c,
+          neucore_group: options.neucoreGroup,
+        })))
+
+      return (await trx('ping_view_permissions')).map(rawToPingViewPermission)
+    })
+  }
 }
 
 function rawToPing(ping: Pings): ApiPing {
@@ -214,5 +263,14 @@ function rawToPingTemplate(
     allowedNeucoreGroups: groups.map(g => g.group),
     updatedAt: template.updated_at.toISOString(),
     updatedBy: template.updated_by,
+  }
+}
+
+function rawToPingViewPermission(
+  viewPermission: PingViewPermissions
+): Omit<ApiPingViewPermission, 'slackChannelName'> {
+  return {
+    slackChannelId: viewPermission.slack_channel_id,
+    neucoreGroup: viewPermission.neucore_group,
   }
 }
