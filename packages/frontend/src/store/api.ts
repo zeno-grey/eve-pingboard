@@ -4,7 +4,9 @@ import {
   ApiEventsResponse,
   ApiMeResponse,
   ApiNeucoreGroupsResponse,
+  ApiPing,
   ApiPingInput,
+  ApiPingsResponse,
   ApiPingTemplate,
   ApiPingTemplateInput,
   ApiPingTemplatesResponse,
@@ -15,7 +17,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/dist/query/react'
 export const apiSlice = createApi({
   reducerPath: 'loginApi',
   baseQuery: fetchBaseQuery({ baseUrl: '/', credentials: 'same-origin' }),
-  tagTypes: ['User', 'Event', 'PingTemplate', 'PingChannel', 'NeucoreGroup'],
+  tagTypes: ['User', 'Event', 'Ping', 'PingTemplate', 'PingChannel', 'NeucoreGroup'],
   endpoints: builder => ({
     /* User Management */
     getUser: builder.query<ApiMeResponse, void>({
@@ -31,7 +33,7 @@ export const apiSlice = createApi({
     getEvents: builder.query<ApiEventsResponse, GetEventsOptions>({
       query: params => ({ url: 'api/events', params }),
       providesTags: (result) => result && result.events.length > 0
-        ? [...result.events.map(({ id }) => ({ type: 'Event' as const, id }))]
+        ? result.events.map(({ id }) => ({ type: 'Event' as const, id }))
         : ['Event'],
     }),
     addEvent: builder.mutation<ApiEventEntry, ApiEventEntryInput>({
@@ -48,25 +50,32 @@ export const apiSlice = createApi({
     }),
 
     /* Pings */
-    postPing: builder.mutation<void, ApiPingInput>({
+    getPings: builder.query<ApiPingsResponse, { before?: string } | void>({
+      query: params => ({ url: 'api/pings', params: params || undefined }),
+      providesTags: result => result && result.pings.length > 0
+        ? result.pings.map(({ id }) => ({ type: 'Ping' as const, id }))
+        : ['Ping'],
+    }),
+    addPing: builder.mutation<ApiPing, ApiPingInput>({
       query: ping => ({ url: 'api/pings', method: 'POST', body: ping }),
+      invalidatesTags: result => result ? [({ type: 'Ping' as const, id: result.id })] : ['Ping'],
     }),
     getPingChannels: builder.query<ApiSlackChannelsResponse, void>({
       query: () => ({ url: 'api/pings/channels' }),
       providesTags: result => result && result.channels.length > 0
-        ? [...result.channels.map(({ id }) => ({ type: 'PingChannel' as const, id }))]
+        ? result.channels.map(({ id }) => ({ type: 'PingChannel' as const, id }))
         : ['PingChannel'],
     }),
     getAvailableNeucoreGroups: builder.query<ApiNeucoreGroupsResponse, void>({
       query: () => ({ url: 'api/pings/neucore-groups' }),
       providesTags: result => result && result.neucoreGroups.length > 0
-        ? [...result.neucoreGroups.map(({ id }) => ({ type: 'NeucoreGroup' as const, id }))]
+        ? result.neucoreGroups.map(({ id }) => ({ type: 'NeucoreGroup' as const, id }))
         : ['NeucoreGroup'],
     }),
     getPingTemplates: builder.query<ApiPingTemplatesResponse, void>({
       query: () => ({ url: 'api/pings/templates' }),
       providesTags: (result) => result && result.templates.length > 0
-        ? [...result.templates.map(({ id }) => ({ type: 'PingTemplate' as const, id }))]
+        ? result.templates.map(({ id }) => ({ type: 'PingTemplate' as const, id }))
         : ['PingTemplate'],
     }),
     addPingTemplate: builder.mutation<ApiPingTemplate, ApiPingTemplateInput>({
@@ -106,7 +115,8 @@ export const {
   useUpdateEventMutation,
   useDeleteEventMutation,
 
-  usePostPingMutation,
+  useGetPingsQuery,
+  useAddPingMutation,
   useGetPingChannelsQuery,
   useGetAvailableNeucoreGroupsQuery,
   useGetPingTemplatesQuery,

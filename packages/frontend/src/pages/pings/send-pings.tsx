@@ -2,11 +2,11 @@ import { ApiPingTemplate } from '@ping-board/common'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { Alert, Button, Col, Form, ListGroup, Modal, Row, Spinner } from 'react-bootstrap'
 import { Prompt } from 'react-router-dom'
-import { useGetPingTemplatesQuery, usePostPingMutation } from '../../store'
+import { useGetPingTemplatesQuery, useAddPingMutation } from '../../store'
 
 export function SendPings(): JSX.Element {
   const pingTemplates = useGetPingTemplatesQuery()
-  const [postPing, postPingState] = usePostPingMutation()
+  const [postPing, postPingState] = useAddPingMutation()
 
   const [selectedTemplate, setSelectedTemplate] = useState<ApiPingTemplate | null>(null)
   const [pingText, setPingText] = useState<string>('')

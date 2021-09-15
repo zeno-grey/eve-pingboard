@@ -1,0 +1,36 @@
+.sent-pings-table {
+  max-width: 100%;
+  overflow: hidden;
+  & td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  & .text-cell {
+    width: 100%;
+    & > div {
+      white-space: normal;
+      max-height: 1.5rem;
+      overflow: hidden;
+      position: relative;
+      color: transparent;
+      user-select: text;
+
+      &::after {
+        pointer-events: none;
+        content: attr(title);
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        color: white;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        user-select: none;
+      }
+    }
+  }
+}

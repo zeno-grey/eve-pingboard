@@ -5,6 +5,7 @@ import { useGetUserQuery } from '../../store'
 import { ManagePings } from './manage-pings'
 import { SendPings } from './send-pings'
 import './pings.scss'
+import { SentPings } from './sent-pings'
 
 export function PingsPage(): JSX.Element {
   const me = useGetUserQuery()
@@ -34,6 +35,9 @@ export function PingsPage(): JSX.Element {
         <Route exact path={path}>
           <div className="pings-header">
             <h3>Send Pings</h3>
+            <Link to={`${url}/sent`} className="btn btn-primary" role="button">
+              Show Sent Pings
+            </Link>
             <div style={{ flex: 1 }} />
             {canEdit &&
               <Link to={`${url}/manage`} className="btn btn-primary" role="button">
@@ -42,6 +46,9 @@ export function PingsPage(): JSX.Element {
             }
           </div>
           <SendPings />
+        </Route>
+        <Route path={`${path}/sent`}>
+          <SentPings />
         </Route>
         {canEdit &&
           <Route path={`${path}/manage`}>
