@@ -11,6 +11,9 @@
 .edit-timer-dialog-footer {
   position: relative;
   overflow: hidden;
+  & > * {
+    margin: 0 !important;
+  }
 }
 
 .edit-timer-dialog-buttons-wrapper {
@@ -21,7 +24,6 @@
   flex-direction: row;
   justify-content: flex-end;
 
-  margin: 0;
   & > * {
     margin: $modal-footer-margin-between * .5;
   }
@@ -50,7 +52,6 @@
 
   padding: $modal-inner-padding - $modal-footer-margin-between * .5;
 
-  margin: 0;
   & > * {
     margin: $modal-footer-margin-between * .5;
   }
