@@ -11,6 +11,7 @@ import {
   ApiPingViewPermissionsByChannelInput,
   ApiSlackChannelsResponse,
   ApiPingViewPermission,
+  ApiPings,
 } from '@ping-board/common'
 import { UserRoles, userRoles } from '../../middleware/user-roles'
 import { SlackClient, SlackRequestFailedError } from '../../slack/slack-client'
@@ -25,6 +26,21 @@ export function getRouter(options: {
   pings: PingsRepository,
 }): Router {
   const router = new Router()
+
+  router.get('/', userRoles.requireOneOf(UserRoles.PING), async ctx => {
+    if (!ctx.session?.character) {
+      throw new Unauthorized()
+    }
+    const beforeParam = ctx.query['before']
+    const before = typeof beforeParam === 'string' ? new Date(beforeParam) : undefined
+    const pings = await options.pings.getPings({
+      characterName: ctx.session.character.name,
+      neucoreGroups: ctx.session.character.neucoreGroups.map(g => g.name),
+      before,
+    })
+    const response: ApiPings = { pings }
+    ctx.body = response
+  })
 
   router.post('/', userRoles.requireOneOf(UserRoles.PING), async ctx => {
     if (!ctx.session?.character) {

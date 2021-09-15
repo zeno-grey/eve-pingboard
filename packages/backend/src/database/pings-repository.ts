@@ -34,6 +34,32 @@ export class PingsRepository {
     private readonly knex: Knex,
   ) {}
 
+  async getPings(options: {
+    characterName: string
+    neucoreGroups: string[]
+    before?: Date
+  }): Promise<ApiPing[]> {
+    let query = this.knex('pings')
+      .select('pings.*')
+      .leftJoin(
+        'ping_view_permissions',
+        'pings.slack_channel_id',
+        'ping_view_permissions.slack_channel_id'
+      )
+      .where(builder => builder
+        .where('pings.author', options.characterName)
+        .orWhereIn('ping_view_permissions.neucore_group', options.neucoreGroups)
+      )
+      .orderBy('pings.sent_at', 'desc')
+      .limit(100)
+    if (options.before) {
+      query = query.where('pings.sent_at', '<', options.before)
+    }
+    const pings = await query
+
+    return pings.map(rawToPing)
+  }
+
   async addPing(options: {
     text: string,
     template: ApiPingTemplate,

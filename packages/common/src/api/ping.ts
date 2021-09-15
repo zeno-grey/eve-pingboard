@@ -11,3 +11,7 @@ export interface ApiPing {
   author: string
   sentAt: string
 }
+
+export interface ApiPings {
+  pings: ApiPing[]
+}
