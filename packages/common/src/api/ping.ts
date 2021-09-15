@@ -12,6 +12,7 @@ export interface ApiPing {
   sentAt: string
 }
 
-export interface ApiPings {
+export interface ApiPingsResponse {
   pings: ApiPing[]
+  remaining: number
 }

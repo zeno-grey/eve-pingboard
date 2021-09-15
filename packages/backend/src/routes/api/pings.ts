@@ -11,7 +11,7 @@ import {
   ApiPingViewPermissionsByChannelInput,
   ApiSlackChannelsResponse,
   ApiPingViewPermission,
-  ApiPings,
+  ApiPingsResponse,
 } from '@ping-board/common'
 import { UserRoles, userRoles } from '../../middleware/user-roles'
 import { SlackClient, SlackRequestFailedError } from '../../slack/slack-client'
@@ -38,7 +38,7 @@ export function getRouter(options: {
       neucoreGroups: ctx.session.character.neucoreGroups.map(g => g.name),
       before,
     })
-    const response: ApiPings = { pings }
+    const response: ApiPingsResponse = { ...pings }
     ctx.body = response
   })
 
