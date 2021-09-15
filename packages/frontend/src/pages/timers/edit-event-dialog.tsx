@@ -63,6 +63,7 @@ export function EditEventDialog({
           ? editedEvent.time.fixed.toISOString()
           : dayjs().add(editedEvent.time.relative).utc().toISOString(),
       })
+      setEditedEvent(getDefaultEditedEvent())
     }
   }
 
@@ -128,6 +129,7 @@ export function EditEventDialog({
   const handleConfirmDelete = () => {
     setIsDeletePending(false)
     onDelete?.()
+    setEditedEvent(getDefaultEditedEvent())
   }
 
   return (
@@ -153,7 +155,7 @@ export function EditEventDialog({
             <Form.Group as={Col} controlId="priority" xs={12} sm={6} className="mb-3">
               <Form.Label>Priority</Form.Label>
               <Form.Select
-                value={editedEvent?.priority ?? ''}
+                value={editedEvent.priority}
                 onChange={handleSelectValueChange('priority')}
               >
                 <option value="">(Please Select)</option>
@@ -168,7 +170,7 @@ export function EditEventDialog({
             <Form.Group as={Col} controlId="structure" xs={12} sm={6} className="mb-3">
               <Form.Label>Structure</Form.Label>
               <Form.Select
-                value={editedEvent?.structure ?? ''}
+                value={editedEvent.structure}
                 onChange={handleSelectValueChange('structure')}
               >
                 <option value="">(Please Select)</option>
@@ -183,7 +185,7 @@ export function EditEventDialog({
             <Form.Group as={Col} controlId="type" xs={12} sm={6} className="mb-3">
               <Form.Label>Type</Form.Label>
               <Form.Select
-                value={editedEvent?.type ?? ''}
+                value={editedEvent.type}
                 onChange={handleSelectValueChange('type')}
               >
                 <option value="">(Please Select)</option>
@@ -198,7 +200,7 @@ export function EditEventDialog({
             <Form.Group as={Col} controlId="standing" xs={12} sm={6} className="mb-3">
               <Form.Label>Standing</Form.Label>
               <Form.Select
-                value={editedEvent?.standing ?? ''}
+                value={editedEvent.standing}
                 onChange={handleSelectValueChange('standing')}
               >
                 <option value="">(Please Select)</option>
@@ -213,7 +215,7 @@ export function EditEventDialog({
             <Form.Group as={Col} controlId="result" xs={12} sm={6} className="mb-3">
               <Form.Label>Result</Form.Label>
               <Form.Select
-                value={editedEvent?.result ?? 'No data'}
+                value={editedEvent.result}
                 onChange={handleSelectValueChange('result')}
               >
                 {result.map(type => (
