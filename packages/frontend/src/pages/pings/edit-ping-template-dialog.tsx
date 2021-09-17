@@ -123,7 +123,7 @@ export function EditPingTemplateDialog({
 
             <Form.Group as={Col} controlId="addNeucoreGroup" xs={12} className="mb-3">
               <Form.Label>Neucore Groups Allowed to Ping</Form.Label>
-              <Table>
+              <Table variant="dark">
                 <thead>
                   <tr>
                     <th style={{ width: '100%' }}>Group</th>
@@ -134,7 +134,7 @@ export function EditPingTemplateDialog({
                   {editedTemplate.allowedNeucoreGroups.length === 0 &&
                     <tr>
                       <td colSpan={2}>
-                        <Alert variant="warning" style={{ marginBottom: 0, padding: '0.5rem' }}>
+                        <Alert variant="warning" className="mb-0 p-1">
                           <i className="bi-exclamation-triangle" />{' '}
                           All users allowed to ping can use this template
                         </Alert>
@@ -143,16 +143,12 @@ export function EditPingTemplateDialog({
                   }
                   {editedTemplate.allowedNeucoreGroups.map(g => (
                     <tr key={g}>
-                      <td>
-                        <span className="ping-template-group-name">
-                          {g}
-                        </span>
-                      </td>
+                      <td className="align-middle">{g}</td>
                       <td>
                         <Button
                           size="sm"
                           onClick={() => handleRemoveNeucoreGroup(g)}
-                          style={{ whiteSpace: 'nowrap' }}
+                          className="text-nowrap"
                         >
                           <i className="bi-trash-fill" /> Remove
                         </Button>
