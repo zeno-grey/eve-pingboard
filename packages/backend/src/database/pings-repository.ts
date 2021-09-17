@@ -42,6 +42,7 @@ export class PingsRepository {
     return await this.knex.transaction(async trx => {
       let query = trx('pings')
         .select('pings.*')
+        .distinct('id')
         .leftJoin(
           'ping_view_permissions',
           'pings.slack_channel_id',
