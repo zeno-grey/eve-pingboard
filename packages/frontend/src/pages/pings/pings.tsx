@@ -19,7 +19,7 @@ export function PingsPage(): JSX.Element {
 
   if (!me.isFetching) {
     if (!me.data?.isLoggedIn) {
-      return <Redirect to="/login" />
+      return <Redirect to={`/login?postLoginRedirect=${url}`} />
     }
     if (!canRead) {
       return (

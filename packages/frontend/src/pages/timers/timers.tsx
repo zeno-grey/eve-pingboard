@@ -1,7 +1,7 @@
 import { ApiEventEntry, ApiEventEntryInput, UserRoles } from '@ping-board/common'
 import { useEffect, useState } from 'react'
 import { Button, Container } from 'react-bootstrap'
-import { Redirect } from 'react-router-dom'
+import { Redirect, useRouteMatch } from 'react-router-dom'
 import {
   useAddEventMutation,
   useDeleteEventMutation,
@@ -71,9 +71,10 @@ export function TimersPage(): JSX.Element {
     cancelEdit()
   }
 
+  const { url } = useRouteMatch()
   if (!me.isFetching) {
     if (!me.data?.isLoggedIn) {
-      return <Redirect to="/login" />
+      return <Redirect to={`/login?postLoginRedirect=${url}`} />
     }
     if (!canRead) {
       return (

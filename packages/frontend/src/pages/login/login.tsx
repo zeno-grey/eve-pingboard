@@ -1,9 +1,27 @@
 import { Col, Container, Row } from 'react-bootstrap'
+import { Redirect, useLocation } from 'react-router-dom'
 import logo from '../../brave-logo.svg'
+import { useGetUserQuery } from '../../store'
 import loginButton from './eve-sso-login-black-large.png'
 import './login.scss'
 
 export function LoginPage(): JSX.Element {
+  const me = useGetUserQuery()
+
+  const location = useLocation()
+
+  if (me.data?.isLoggedIn) {
+    return <Redirect to="/" />
+  }
+
+  const urlParams = new URLSearchParams(location.search)
+  const postLoginRedirect = urlParams.get('postLoginRedirect')
+  const loginUrl = '/auth/login' + (
+    postLoginRedirect
+    ? `?${new URLSearchParams({ postLoginRedirect })}`
+    : ''
+  )
+
   return (
     <Container className="login-container">
       <div style={{ flex: '33%' }} />
@@ -13,7 +31,7 @@ export function LoginPage(): JSX.Element {
           <hr />
           <p>Log in with your EVE Online Account to gain access.</p>
           <p>
-            <a href="/auth/login">
+            <a href={loginUrl}>
               <img src={loginButton} alt="LOG IN with EVE Online" />
             </a>
           </p>
