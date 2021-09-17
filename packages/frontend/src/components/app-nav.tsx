@@ -18,7 +18,9 @@ export function AppNav(props: AppNavProps): JSX.Element {
     history.push(href)
   }
 
-  const user = useGetUserQuery()
+  const user = useGetUserQuery(void 0, {
+    pollingInterval: 60 * 1000,
+  })
   const [logout, { isLoading: isLoggingOut }] = useLogOutMutation()
 
   const isLoading = user.isFetching || isLoggingOut
