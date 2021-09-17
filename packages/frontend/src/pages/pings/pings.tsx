@@ -4,8 +4,9 @@ import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useGetUserQuery } from '../../store'
 import { ManagePingTemplates } from './manage-ping-templates'
 import { SendPings } from './send-pings'
-import './pings.scss'
 import { SentPings } from './sent-pings'
+import { ManagePingViewAccess } from './manage-view-access'
+import './pings.scss'
 
 export function PingsPage(): JSX.Element {
   const me = useGetUserQuery()
@@ -50,11 +51,14 @@ export function PingsPage(): JSX.Element {
         <Route path={`${path}/sent`}>
           <SentPings />
         </Route>
-        {canEdit &&
+        {canEdit && <>
           <Route path={`${path}/templates`}>
             <ManagePingTemplates />
           </Route>
-        }
+          <Route path={`${path}/view-access`}>
+            <ManagePingViewAccess />
+          </Route>
+        </>}
       </Switch>
     </Container>
   )

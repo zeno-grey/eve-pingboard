@@ -10,6 +10,8 @@ import {
   ApiPingTemplate,
   ApiPingTemplateInput,
   ApiPingTemplatesResponse,
+  ApiPingViewPermissions,
+  ApiPingViewPermissionsByGroupInput,
   ApiSlackChannelsResponse,
 } from '@ping-board/common'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/dist/query/react'
@@ -17,7 +19,15 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/dist/query/react'
 export const apiSlice = createApi({
   reducerPath: 'loginApi',
   baseQuery: fetchBaseQuery({ baseUrl: '/', credentials: 'same-origin' }),
-  tagTypes: ['User', 'Event', 'Ping', 'PingTemplate', 'PingChannel', 'NeucoreGroup'],
+  tagTypes: [
+    'User',
+    'Event',
+    'Ping',
+    'PingTemplate',
+    'PingChannel',
+    'NeucoreGroup',
+    'PingViewPermission',
+  ],
   endpoints: builder => ({
     /* User Management */
     getUser: builder.query<ApiMeResponse, void>({
@@ -33,7 +43,7 @@ export const apiSlice = createApi({
     getEvents: builder.query<ApiEventsResponse, GetEventsOptions>({
       query: params => ({ url: 'api/events', params }),
       providesTags: (result) => result && result.events.length > 0
-        ? result.events.map(({ id }) => ({ type: 'Event' as const, id }))
+        ? result.events.map(({ id }) => ({ type: 'Event', id }))
         : ['Event'],
     }),
     addEvent: builder.mutation<ApiEventEntry, ApiEventEntryInput>({
@@ -53,29 +63,29 @@ export const apiSlice = createApi({
     getPings: builder.query<ApiPingsResponse, { before?: string } | void>({
       query: params => ({ url: 'api/pings', params: params || undefined }),
       providesTags: result => result && result.pings.length > 0
-        ? result.pings.map(({ id }) => ({ type: 'Ping' as const, id }))
+        ? result.pings.map(({ id }) => ({ type: 'Ping', id }))
         : ['Ping'],
     }),
     addPing: builder.mutation<ApiPing, ApiPingInput>({
       query: ping => ({ url: 'api/pings', method: 'POST', body: ping }),
-      invalidatesTags: result => result ? [({ type: 'Ping' as const, id: result.id })] : ['Ping'],
+      invalidatesTags: result => result ? [({ type: 'Ping', id: result.id })] : ['Ping'],
     }),
     getPingChannels: builder.query<ApiSlackChannelsResponse, void>({
       query: () => ({ url: 'api/pings/channels' }),
       providesTags: result => result && result.channels.length > 0
-        ? result.channels.map(({ id }) => ({ type: 'PingChannel' as const, id }))
+        ? result.channels.map(({ id }) => ({ type: 'PingChannel', id }))
         : ['PingChannel'],
     }),
     getAvailableNeucoreGroups: builder.query<ApiNeucoreGroupsResponse, void>({
       query: () => ({ url: 'api/pings/neucore-groups' }),
       providesTags: result => result && result.neucoreGroups.length > 0
-        ? result.neucoreGroups.map(({ id }) => ({ type: 'NeucoreGroup' as const, id }))
+        ? result.neucoreGroups.map(({ id }) => ({ type: 'NeucoreGroup', id }))
         : ['NeucoreGroup'],
     }),
     getPingTemplates: builder.query<ApiPingTemplatesResponse, void>({
       query: () => ({ url: 'api/pings/templates' }),
       providesTags: (result) => result && result.templates.length > 0
-        ? result.templates.map(({ id }) => ({ type: 'PingTemplate' as const, id }))
+        ? result.templates.map(({ id }) => ({ type: 'PingTemplate', id }))
         : ['PingTemplate'],
     }),
     addPingTemplate: builder.mutation<ApiPingTemplate, ApiPingTemplateInput>({
@@ -96,6 +106,21 @@ export const apiSlice = createApi({
       query: id => ({ url: `api/pings/templates/${id}`, method: 'DELETE' }),
       invalidatesTags: (result, _, arg) =>
         result ? [{ type: 'PingTemplate', id: arg }] : ['PingTemplate'],
+    }),
+    getPingViewPermissions: builder.query<ApiPingViewPermissions, void>({
+      query: () => ({ url: 'api/pings/view-permissions' }),
+      providesTags: ['PingViewPermission'],
+    }),
+    updatePingViewPermissionsByNeucoreGroup: builder.mutation<
+      ApiPingViewPermissions,
+      ApiPingViewPermissionsByGroupInput & { neucoreGroup: string }
+    >({
+      query: ({ neucoreGroup, ...body }) => ({
+        url: `api/pings/view-permissions/groups/${neucoreGroup}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['PingViewPermission', 'Ping'],
     }),
   }),
 })
@@ -123,4 +148,6 @@ export const {
   useAddPingTemplateMutation,
   useUpdatePingTemplateMutation,
   useDeletePingTemplateMutation,
+  useGetPingViewPermissionsQuery,
+  useUpdatePingViewPermissionsByNeucoreGroupMutation,
 } = apiSlice

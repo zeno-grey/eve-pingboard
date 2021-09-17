@@ -11,11 +11,13 @@ export function SentPings(): JSX.Element {
   const me = useGetUserQuery()
 
   const canRead = me.data?.isLoggedIn && me.data?.character.roles.includes(UserRoles.PING)
+  const canEdit = me.data?.isLoggedIn &&
+    me.data.character.roles.includes(UserRoles.PING_TEMPLATES_WRITE)
 
   const pings = usePingsList({ skip: me.isLoading || !canRead })
 
   const { url } = useRouteMatch()
-  const pingsUrl = url.split('/').slice(0, url.split('/').length - 1).join('/')
+  const pingsUrl = url.split('/').slice(0, -1).join('/')
 
   return (<>
     <div className="pings-header">
@@ -27,6 +29,11 @@ export function SentPings(): JSX.Element {
       <Link to={pingsUrl} className="btn btn-primary" role="button">
         <i className="bi-arrow-left" /> Back to Pings
       </Link>
+      {canEdit &&
+        <Link to={`${pingsUrl}/view-access`} className="btn btn-primary" role="button">
+          <i className="bi-wrench" /> Manage View Access
+        </Link>
+      }
     </div>
     <Row>
       <Col xs={12}>
