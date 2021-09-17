@@ -260,11 +260,13 @@ export class PingsRepository {
         .delete()
         .where({ slack_channel_id: options.channelId })
 
-      await trx('ping_view_permissions')
-        .insert(options.neucoreGroups.map(g => ({
-          slack_channel_id: options.channelId,
-          neucore_group: g,
-        })))
+      if (options.neucoreGroups.length > 0) {
+        await trx('ping_view_permissions')
+          .insert(options.neucoreGroups.map(g => ({
+            slack_channel_id: options.channelId,
+            neucore_group: g,
+          })))
+      }
 
       return (await trx('ping_view_permissions')).map(rawToPingViewPermission)
     })
@@ -279,11 +281,13 @@ export class PingsRepository {
         .delete()
         .where({ neucore_group: options.neucoreGroup })
 
-      await trx('ping_view_permissions')
-        .insert(options.channelIds.map(c => ({
-          slack_channel_id: c,
-          neucore_group: options.neucoreGroup,
-        })))
+      if (options.channelIds.length > 0) {
+        await trx('ping_view_permissions')
+          .insert(options.channelIds.map(c => ({
+            slack_channel_id: c,
+            neucore_group: options.neucoreGroup,
+          })))
+      }
 
       return (await trx('ping_view_permissions')).map(rawToPingViewPermission)
     })
