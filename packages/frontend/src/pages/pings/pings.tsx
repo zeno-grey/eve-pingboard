@@ -2,7 +2,7 @@ import { UserRoles } from '@ping-board/common'
 import { Container } from 'react-bootstrap'
 import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useGetUserQuery } from '../../store'
-import { ManagePings } from './manage-pings'
+import { ManagePingTemplates } from './manage-ping-templates'
 import { SendPings } from './send-pings'
 import './pings.scss'
 import { SentPings } from './sent-pings'
@@ -40,7 +40,7 @@ export function PingsPage(): JSX.Element {
             </Link>
             <div style={{ flex: 1 }} />
             {canEdit &&
-              <Link to={`${url}/manage`} className="btn btn-primary" role="button">
+              <Link to={`${url}/templates`} className="btn btn-primary" role="button">
                 <i className="bi-wrench" /> Manage Ping Templates
               </Link>
             }
@@ -51,8 +51,8 @@ export function PingsPage(): JSX.Element {
           <SentPings />
         </Route>
         {canEdit &&
-          <Route path={`${path}/manage`}>
-            <ManagePings />
+          <Route path={`${path}/templates`}>
+            <ManagePingTemplates />
           </Route>
         }
       </Switch>

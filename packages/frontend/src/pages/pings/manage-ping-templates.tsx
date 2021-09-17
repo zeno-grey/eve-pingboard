@@ -11,7 +11,7 @@ import {
 import { EditPingTemplateDialog } from './edit-ping-template-dialog'
 import './pings.scss'
 
-export function ManagePings(): JSX.Element {
+export function ManagePingTemplates(): JSX.Element {
   const pingTemplates = useGetPingTemplatesQuery()
   const [addTemplate] = useAddPingTemplateMutation()
   const [updateTemplate] = useUpdatePingTemplateMutation()
@@ -27,7 +27,7 @@ export function ManagePings(): JSX.Element {
   const cancelEdit = () => setTemplateDialogState({ template: null, show: false })
 
   const { url } = useRouteMatch()
-  const pingsUrl = url.split('/').slice(0, url.split('/').length - 1).join('/')
+  const pingsUrl = url.split('/').slice(0, -1).join('/')
 
   const confirmEditTemplate = (template: ApiPingTemplateInput) => {
     if (!templateDialogState.template) {
