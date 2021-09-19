@@ -56,7 +56,16 @@ async function main() {
   })
 
   const port = process.env.PORT ?? '3000'
-  await new Promise<void>(res => app.listen(parseInt(port), res))
+  await new Promise<void>((resolve, reject) => {
+    const listenTimeout = 10
+    const timeout = setTimeout(() => reject(
+      new Error(`Timed out after ${listenTimeout}s while trying to listen on port ${port}`)
+    ), listenTimeout * 1000)
+    app.listen(parseInt(port), () => {
+      clearTimeout(timeout)
+      resolve()
+    })
+  })
 
   console.log(`Listening on port ${port}`)
 }
