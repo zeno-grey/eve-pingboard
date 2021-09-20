@@ -6,6 +6,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import utc from 'dayjs/plugin/utc'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
+import { useEffect, useState } from 'react'
 dayjs.extend(duration)
 dayjs.extend(localeData)
 dayjs.extend(localizedFormat)
@@ -161,6 +162,24 @@ const locales = {
 
 //#endregion
 
+const localeChangeListeners = new Set<(newLocale: string) => void>()
+/**
+ * Returns the currently active Day.js locale.
+ *
+ * Can also be used to re-render a component when the locale changes.
+ */
+export function useDayjsLocale(): string {
+  const [locale, setLocale] = useState(dayjs.locale())
+
+  // Ideally, this would be inside the useEffect body, but that results in race-conditions making
+  // the useDayjsLocale hook result not update properly if the new locale is loaded too fast.
+  localeChangeListeners.add(setLocale)
+  useEffect(() => {
+    return () => { localeChangeListeners.delete(setLocale) }
+  }, [])
+  return locale
+}
+
 async function loadLocale() {
   let success = false
   for (const language of navigator.languages ?? []) {
@@ -172,6 +191,7 @@ async function loadLocale() {
         dayjs.locale(locale)
         console.log('loaded dayjs locale', locale)
         success = true
+        localeChangeListeners.forEach(l => l(locale))
         break
       } catch {
         // failing is fine, we'll just try the next one
