@@ -4,10 +4,12 @@
   &.#{$name} {
     background-color: $background;
 
-    @if (contrast-ratio($background, $white) >= $min-contrast-ratio) {
-      color: $white;
-    } @else {
-      color: $black;
+    &, & * {
+      @if (contrast-ratio($background, $white) >= $min-contrast-ratio) {
+        color: $white;
+      } @else {
+        color: $black;
+      }
     }
   }
 }
@@ -32,11 +34,22 @@
 }
 
 .calendar-event {
+  display: flex;
+  flex-direction: column;
+  @include media-breakpoint-up(lg) {
+    flex-direction: row;
+  }
+
   border-radius: $border-radius;
   margin: $spacer * 0.25;
   margin-top: 0;
   padding-left: $spacer * 0.25;
   padding-right: $spacer * 0.25;
+  line-height: 1.2;
+  padding-top: .1rem;
+  padding-bottom: .1rem;
+
+  cursor: pointer;
 
   @each $name, $color in $colors {
     @include calendar-event-color-variant($name, shade-color($color, 20%));

@@ -1,28 +1,50 @@
+import { UserRoles } from '@ping-board/common'
 import dayjs from 'dayjs'
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, Container } from 'react-bootstrap'
-import { Calendar, eventColors } from './calendar'
+import { Redirect, useRouteMatch } from 'react-router-dom'
+import { useAppDispatch, useAppSelector } from '../../hooks/redux'
+import { useGetUserQuery } from '../../store'
+import { loadMonth, selectCalendarEvents } from '../../store/calendar-slice'
+import { Calendar } from './calendar'
 
 export function CalendarPage(): JSX.Element {
-  const events = useMemo(() => [...new Array<void>(50)].map((_, i) => {
-    const dateTime = new Date(Date.now() + (1000 * 60 * 60 * (Math.random() * 960 - 480)))
-    return {
-      title: `Test #${i}`,
-      dateTime,
-      color: eventColors[Math.floor(Math.random() * eventColors.length)],
-    }
-  }), [])
+  const dispatch = useAppDispatch()
+  const me = useGetUserQuery()
+  const canRead = me.data?.isLoggedIn && me.data.character.roles.includes(UserRoles.EVENTS_READ)
+
+  const events = useAppSelector(selectCalendarEvents)
 
   const [currentMonth, setCurrentMonth] = useState(dayjs.utc())
+  const month = currentMonth.month()
+  const year = currentMonth.year()
+  useEffect(() => {
+    dispatch(loadMonth({ month, year }))
+  }, [dispatch, month, year])
+
   const handleTodayClicked = () => setCurrentMonth(dayjs.utc())
   const handleNextMonthClicked = () =>
     setCurrentMonth(m => m.add(dayjs.duration({ months: 1 })))
   const handlePrevMonthClicked = () =>
     setCurrentMonth(m => m.subtract(dayjs.duration({ months: 1 })))
 
+  const { url } = useRouteMatch()
+  if (!me.isFetching) {
+    if (!me.data?.isLoggedIn) {
+      return <Redirect to={`/login?postLoginRedirect=${url}`} />
+    }
+    if (!canRead) {
+      return (
+        <Container fluid>
+          <h6>Sorry, you don&apos;t have permission to view this page.</h6>
+        </Container>
+      )
+    }
+  }
+
   return (
     <Container fluid className="h-100 d-flex flex-column">
-      <h3>Calendar</h3>
+      <h3 className="mt-n1 pt-3">Calendar</h3>
       <div className="d-flex mb-2">
         <Button size="sm" variant="outline-light" className="me-2" onClick={handleTodayClicked}>
           Today

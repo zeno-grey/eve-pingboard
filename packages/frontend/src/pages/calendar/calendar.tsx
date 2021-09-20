@@ -1,5 +1,9 @@
 import clsx from 'clsx'
-import { dayjs } from '../../utils/dayjs'
+import { useState } from 'react'
+import { Time } from '../../components/time'
+import { CalendarEntry, getDisplayedMonthRange } from '../../store/calendar-slice'
+import { dayjs, useDayjsLocale } from '../../utils/dayjs'
+import { CalendarEntryDialog } from './calendar-entry-dialog'
 import './calendar.scss'
 
 export const eventColors = [
@@ -15,15 +19,10 @@ export const eventColors = [
   'cyan',
   'gray',
 ] as const
-interface CalendarEvent {
-  title: string
-  dateTime: Date
-  color: typeof eventColors[number]
-}
 interface CalendarProps {
   year: number
   month: number
-  events: CalendarEvent[]
+  events: CalendarEntry[]
   className?: string
 }
 export function Calendar({
@@ -32,30 +31,37 @@ export function Calendar({
   events,
   className,
 }: CalendarProps): JSX.Element {
-  const from = dayjs.utc(`${year}-${month + 1}-01`)
-  const fillerDaysBeforeMonth = from.day() - 1
-  const totalDisplayedWeeks = Math.ceil((from.daysInMonth() + fillerDaysBeforeMonth) / 7)
-  const weeks = [...new Array<void>(totalDisplayedWeeks)]
+  const { from, displayedWeeks } = getDisplayedMonthRange({ year, month })
+
+  const [showEntryDialog, setShowEntryDialog] = useState(false)
+  const [selectedEntry, setSelectedEntry] = useState<CalendarEntry | null>(null)
+  const handleClickEntry = (entry: CalendarEntry) => {
+    setShowEntryDialog(true)
+    setSelectedEntry(entry)
+  }
+  const handleHideEntry = () => { setShowEntryDialog(false) }
+
+  const weeks = [...new Array<void>(displayedWeeks)]
     .map((_, week) => ({
       week: from.add(week * 7, 'days').week(),
       days: [...new Array<void>(7)].map((_, day) => {
-        const date = from.add(week * 7 + day - fillerDaysBeforeMonth, 'days')
+        const date = from.add(week * 7 + day, 'days')
         const start = date.valueOf()
         const end = date.add(1, 'days').valueOf()
         const isToday = date.format('YYYY-MM-DD') === dayjs.utc().format('YYYY-MM-DD')
-        if (date.date() === 17) {
-          console.log(date, start, end, events.map(e => e.dateTime.getTime()))
-        }
         return {
           date,
           isToday,
           events: events.filter(e => {
-            const t = e.dateTime.getTime()
+            const t = dayjs.utc(e.dateTime).valueOf()
             return t >= start && t < end
-          }).sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime()),
+          }).sort((a, b) => dayjs.utc(a.dateTime).valueOf() - dayjs.utc(b.dateTime).valueOf()),
         }
       }),
     }))
+
+  // Update the component when the locale changes
+  useDayjsLocale()
 
   return (
     <div className={clsx('d-flex', 'flex-column', 'bg-dark', className)}>
@@ -101,12 +107,11 @@ export function Calendar({
                 <div key={i}
                   className={clsx(
                     'calendar-event',
-                    e.color,
+                    e.color ?? 'cyan',
                   )}
+                  onClick={() => handleClickEntry(e)}
                 >
-                  <span className="me-1">
-                    {dayjs.utc(e.dateTime).format('HH:mm')}
-                  </span>
+                  <Time time={dayjs.utc(e.dateTime)} asLink format="HH:mm" className="me-1" />
                   <span>{e.title}</span>
                 </div>
               ))}
@@ -114,6 +119,13 @@ export function Calendar({
           ))}
         </div>
       ))}
+
+      <CalendarEntryDialog
+        entry={selectedEntry}
+        show={showEntryDialog}
+        onHide={handleHideEntry}
+        fullscreen="sm-down"
+      />
     </div>
   )
 }
