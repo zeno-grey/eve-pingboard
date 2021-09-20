@@ -26,7 +26,7 @@ export function AppNav(props: AppNavProps): JSX.Element {
   const isLoading = user.isFetching || isLoggingOut
 
   return (
-    <Navbar variant="dark" bg="primary" expand="lg">
+    <Navbar variant="dark" bg="primary" expand="md">
       <Container fluid>
         <Navbar.Brand href="/">Brave Collective Pingboard</Navbar.Brand>
         <Navbar.Toggle aria-controls="navbar-nav" />
