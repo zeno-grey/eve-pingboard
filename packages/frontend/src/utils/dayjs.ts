@@ -169,6 +169,7 @@ async function loadLocale() {
     if (locale in locales) {
       try {
         await locales[locale as keyof typeof locales]()
+        dayjs.locale(locale)
         console.log('loaded dayjs locale', locale)
         success = true
         break
