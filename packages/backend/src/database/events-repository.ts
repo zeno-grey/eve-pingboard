@@ -17,10 +17,10 @@ export class EventsRepository {
       .leftJoin('systems', 'events.system', 'systems.name')
       .orderBy('event_time', options.after ? 'asc' : 'desc')
     if (options.before) {
-      query = query.where('event_time', '<', options.before)
+      query = query.where('event_time', options.after ? '<=' : '<', options.before)
     }
     if (options.after) {
-      query = query.where('event_time', '>=', options.after)
+      query = query.where('event_time', '>', options.after)
     }
     query = query.limit(Math.min(Math.max(1, options.count ?? 40), 40))
     const events = await query
@@ -34,10 +34,10 @@ export class EventsRepository {
     let query = this.knex('events')
       .count({ count: 'id' })
     if (options.before) {
-      query = query.where('event_time', '<', options.before)
+      query = query.where('event_time', options.after ? '<=' : '<', options.before)
     }
     if (options.after) {
-      query = query.where('event_time', '>=', options.after)
+      query = query.where('event_time', '>', options.after)
     }
     const count = await query
     if (count.length > 0 && typeof count[0].count === 'number') {
