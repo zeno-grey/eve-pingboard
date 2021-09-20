@@ -69,6 +69,13 @@ export const pingsListSlice = createSlice({
     .addCase(loadMorePings.rejected, state => {
       state.loading = false
     })
+
+    // Clear state on logout to prevent leaking data that the new user should not be able to see
+    .addMatcher(apiSlice.endpoints.logOut.matchFulfilled, () => {
+      return initialPingsListState
+    })
+
+    // Add sent pings to the list of pings without re-fetching them
     .addMatcher(apiSlice.endpoints.addPing.matchFulfilled, (state, action) => {
       state.pings = sortPings([...state.pings, action.payload])
     }),

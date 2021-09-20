@@ -70,13 +70,22 @@ export const eventsListSlice = createSlice({
     .addCase(loadMoreEvents.rejected, state => {
       state.loading = false
     })
+
+    // Clear state on logout to prevent leaking data that the new user should not be able to see
+    .addMatcher(apiSlice.endpoints.logOut.matchFulfilled, () => {
+      return initialEventsListState
+    })
+
+    // Add added events to the event list without re-fetching them
     .addMatcher(apiSlice.endpoints.addEvent.matchFulfilled, (state, action) => {
       state.events = sortEvents([...state.events, action.payload])
     })
+    // Update updated events in the event list without re-fetching them
     .addMatcher(apiSlice.endpoints.updateEvent.matchFulfilled, (state, action) => {
       const updated = action.payload
       state.events = sortEvents(state.events.map(e => e.id === updated.id ? updated : e))
     })
+    // Remove deleted events from the event list without re-fetching them
     .addMatcher(apiSlice.endpoints.deleteEvent.matchFulfilled, (state, action) => {
       const eventId = action.meta.arg.originalArgs
       state.events = state.events.filter(e => e.id !== eventId)

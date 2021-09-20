@@ -112,6 +112,11 @@ export const calendarSlice = createSlice({
       state.loadedMonths.push(monthKey)
     })
 
+    // Clear state on logout to prevent leaking data that the new user should not be able to see
+    .addMatcher(apiSlice.endpoints.logOut.matchFulfilled, () => {
+      return initialCalendarState
+    })
+
     // Add calendar entries for every added event
     .addMatcher(apiSlice.endpoints.addEvent.matchFulfilled, (state, action) => {
       state.events = [...state.events, calendarEntryFromEvent(action.payload)]
