@@ -16,7 +16,7 @@ import {
   ApiScheduledPingsResponse,
 } from '@ping-board/common'
 import { UserRoles, userRoles } from '../../middleware/user-roles'
-import { SlackClient, SlackRequestFailedError } from '../../slack/slack-client'
+import { SlackClient, slackLink, SlackRequestFailedError } from '../../slack/slack-client'
 import { NeucoreClient } from '../../neucore'
 import { dayjs } from '../../util/dayjs'
 import { PingsRepository, UnknownTemplateError } from '../../database'
@@ -63,9 +63,32 @@ export function getRouter(options: {
     ) {
       throw new Forbidden('you are not permitted to ping using this template')
     }
+
+    const placeholders: { placeholder: string, value: string | (() => string) }[] = [
+      { placeholder: 'me', value: ctx.session.character?.name ?? '' },
+      { placeholder: 'title', value: () => ping.scheduledTitle ?? '' },
+      { placeholder: 'time', value: () => {
+        if (!ping.scheduledFor) {
+          return ''
+        }
+        const time = dayjs.utc(ping.scheduledFor)
+        return slackLink(
+          `https://time.nakamura-labs.com/#${time.unix()}`,
+          `${time.format('YYYY-MM-DD HH:mm')} (${time.fromNow()})`
+        )
+      } },
+    ]
+    const formattedText = placeholders.reduce(
+      (text, { placeholder, value }) => text.replace(
+        new RegExp(`{{${placeholder}}}`),
+        () => typeof value === 'function' ? value() : value
+      ),
+      ping.text
+    )
+
     try {
       const storedPing = await options.pings.addPing({
-        text: ping.text,
+        text: formattedText,
         scheduledTitle: ping.scheduledTitle,
         scheduledFor: ping.scheduledFor,
         characterName: ctx.session.character.name,

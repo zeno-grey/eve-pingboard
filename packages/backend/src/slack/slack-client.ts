@@ -81,3 +81,7 @@ export class SlackClient {
     }
   }
 }
+
+export function slackLink(href: string, title: string): string {
+  return `<${href.replace(/\|/g, '%7C')}|${title.replace(/>/g, '\\>')}>`
+}
