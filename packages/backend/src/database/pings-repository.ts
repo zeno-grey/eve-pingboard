@@ -87,6 +87,53 @@ export class PingsRepository {
     })
   }
 
+  async getScheduledEvents(options: {
+    characterName: string,
+    neucoreGroups: string[],
+    before?: Date | null
+    after?: Date | null
+    count?: number | null
+  }): Promise<{ pings: ApiScheduledPing[], remaining: number }> {
+    return await this.knex.transaction(async trx => {
+      let baseQuery = trx('scheduled_pings')
+        .distinct('pings.id')
+        .innerJoin('pings', 'pings.id', 'scheduled_pings.ping_id')
+        .leftJoin(
+          'ping_view_permissions',
+          'ping_view_permissions.slack_channel_id',
+          'pings.slack_channel_id'
+        )
+        .where(builder => builder
+          .where('pings.author', options.characterName)
+          .orWhereIn('ping_view_permissions.neucore_group', options.neucoreGroups)
+        )
+
+      if (options.before) {
+        baseQuery = baseQuery
+          .where('scheduled_pings.scheduled_for', options.after ? '<=' : '<', options.before)
+      }
+      if (options.after) {
+        baseQuery = baseQuery.where('scheduled_pings.scheduled_for', '>', options.after)
+      }
+
+      const countQuery = baseQuery.clone().count({ count: 'id' })
+      const dataQuery = baseQuery.clone()
+        .select<(Pings & Pick<ScheduledPings, 'scheduled_for' | 'title'>)[]>(
+          'pings.*', 'scheduled_pings.scheduled_for', 'scheduled_pings.title'
+        )
+        .limit(Math.min(Math.max(1, options.count ?? 100), 100))
+        .orderBy('scheduled_pings.scheduled_for', options.after ? 'asc' : 'desc')
+
+      const [count, data] = await Promise.all([countQuery, dataQuery])
+      return {
+        pings: data.map(p => rawToPing(p)),
+        remaining: (count.length > 0 && typeof count[0].count === 'number')
+          ? count[0].count - data.length
+          : 0,
+      }
+    })
+  }
+
   async addPing(options: {
     text: string,
     scheduledTitle?: string,
