@@ -97,7 +97,7 @@ export function EditEventDialog({
   }
 
   return (
-    <Modal show={show} size="lg" backdrop="static">
+    <Modal show={show} size="lg" backdrop="static" dialogClassName="edit-event-dialog">
       <Modal.Header>
         <Modal.Title>{isNewEvent ? 'Add' : 'Edit'} Event</Modal.Title>
       </Modal.Header>
@@ -252,8 +252,8 @@ export function EditEventDialog({
           </Row>
         </Form>
       </Modal.Body>
-      <Modal.Footer className="edit-timer-dialog-footer">
-        <div className={clsx('edit-timer-dialog-buttons-wrapper', isDeletePending && 'hidden')}>
+      <Modal.Footer className="dialog-footer">
+        <div className={clsx('dialog-buttons-wrapper', isDeletePending && 'hidden')}>
           {!isNewEvent && (
             <>
               <Button
@@ -263,7 +263,7 @@ export function EditEventDialog({
               >
                 Delete
               </Button>
-              <div className="edit-timer-dialog-buttons-spacer" />
+              <div className="dialog-buttons-spacer" />
             </>
           )}
           <Button variant="secondary" onClick={onCancel} disabled={isDeletePending}>
@@ -275,13 +275,13 @@ export function EditEventDialog({
         </div>
         {!isNewEvent && (
           <div className={clsx(
-            'edit-timer-confirm-delete-buttons-wrapper',
+            'confirm-delete-buttons-wrapper',
             !isDeletePending && 'hidden'
           )}>
             <Button disabled={!isDeletePending} onClick={handleCancelDelete}>
               No
             </Button>
-            <div className="edit-timer-dialog-buttons-spacer">
+            <div className="dialog-buttons-spacer">
               Are you sure you want to delete the event?
             </div>
             <Button variant="danger" disabled={!isDeletePending} onClick={handleConfirmDelete}>

@@ -1,63 +1,64 @@
 @import '../../theme.scss';
 
-.time-mode-input {
-  transition: $transition-fade;
-}
-
-.inactive-time-mode {
-  opacity: 0.7;
-}
-
-.edit-timer-dialog-footer {
-  position: relative;
-  overflow: hidden;
-  & > * {
-    margin: 0 !important;
-  }
-}
-
-.edit-timer-dialog-buttons-wrapper {
-  position: relative;
-  width: 100%;
-
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-
-  & > * {
-    margin: $modal-footer-margin-between * .5;
+.edit-event-dialog {
+  .time-mode-input {
+    transition: $transition-fade;
   }
 
-  transition: transform .25s ease-out;
-  &.hidden {
-    transform: translateY(-150%);
-  }
-}
-
-.edit-timer-dialog-buttons-spacer {
-  flex: 1;
-  text-align: center;
-}
-
-.edit-timer-confirm-delete-buttons-wrapper {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-
-  padding: $modal-inner-padding - $modal-footer-margin-between * .5;
-
-  & > * {
-    margin: $modal-footer-margin-between * .5;
+  .inactive-time-mode {
+    opacity: 0.7;
   }
 
-  transition: transform .25s ease-out;
-  &.hidden {
-    transform: translateY(150%);
+  .dialog-footer {
+    position: relative;
+    overflow: hidden;
+    & > * {
+      margin: 0 !important;
+    }
+  }
+
+  $delete-transition-duration: 0.125s;
+
+  .dialog-buttons-wrapper,
+  .confirm-delete-buttons-wrapper {
+    transition: transform 0.125s ease-out;
+
+    display: flex;
+    flex-direction: row;
+
+    & > * {
+      margin: $modal-footer-margin-between * .5;
+    }
+  }
+
+  .dialog-buttons-wrapper {
+    position: relative;
+    width: 100%;
+
+    justify-content: flex-end;
+
+    &.hidden {
+      transform: translateY(-150%);
+    }
+  }
+  .confirm-delete-buttons-wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    align-items: center;
+
+    padding: $modal-inner-padding - $modal-footer-margin-between * .5;
+
+    &.hidden {
+      transform: translateY(150%);
+    }
+  }
+
+  .dialog-buttons-spacer {
+    flex: 1;
+    text-align: center;
   }
 }
