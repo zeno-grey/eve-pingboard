@@ -25,6 +25,10 @@ export type ApiScheduledPing =
   & Omit<ApiPing, 'scheduledTitle' | 'scheduledFor'>
   & Required<Pick<ApiPing, 'scheduledTitle' | 'scheduledFor'>>
 
+export function isScheduledPing(ping: ApiPing): ping is ApiScheduledPing {
+  return typeof ping.scheduledFor === 'string' && typeof ping.scheduledTitle === 'string'
+}
+
 export interface ApiScheduledPingsResponse {
   pings: ApiScheduledPing[]
   remaining: number
