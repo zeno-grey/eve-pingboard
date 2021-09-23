@@ -1,4 +1,5 @@
 import { ApiPingTemplate, ApiPingTemplateInput } from '@ping-board/common'
+import React from 'react'
 import { useState } from 'react'
 import { Button, Table } from 'react-bootstrap'
 import { Link, useRouteMatch } from 'react-router-dom'
@@ -92,7 +93,7 @@ export function ManagePingTemplates(): JSX.Element {
             <td>{t.allowScheduling ? 'Yes' : 'No'}</td>
             <td>
               {t.template.split('\n').map((line, i) => (
-                <div key={i}>{line}</div>
+                <React.Fragment key={i}>{line}<br /></React.Fragment>
               ))}
             </td>
             <td>
