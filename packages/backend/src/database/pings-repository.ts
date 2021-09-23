@@ -321,7 +321,7 @@ function rawToPingTemplate(
     slackChannelName: template.slack_channel_name,
     template: template.template,
     allowedNeucoreGroups: groups.map(g => g.group),
-    allowScheduling: template.allow_scheduling,
+    allowScheduling: !!template.allow_scheduling,
     updatedAt: template.updated_at.toISOString(),
     updatedBy: template.updated_by,
   }

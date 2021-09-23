@@ -8,7 +8,7 @@ export interface PingTemplates {
   template: string
   updated_by: string
   updated_at: Date
-  allow_scheduling: boolean
+  allow_scheduling: boolean | 0 | 1
 }
 
 declare module 'knex/types/tables' {
