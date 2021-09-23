@@ -30,7 +30,6 @@ export class TemplateCreationError extends Error {
   }
 }
 
-
 export class PingsRepository {
   constructor(
     private readonly knex: Knex,
@@ -42,48 +41,44 @@ export class PingsRepository {
     before?: Date
   }): Promise<{ pings: ApiPing[], remaining: number }> {
     return await this.knex.transaction(async trx => {
-      let query = trx('pings')
-        .select('pings.*')
-        .distinct('id')
+      let baseQuery = trx('pings')
+        .distinct('pings.id')
         .leftJoin(
           'ping_view_permissions',
-          'pings.slack_channel_id',
-          'ping_view_permissions.slack_channel_id'
+          'ping_view_permissions.slack_channel_id',
+          'pings.slack_channel_id'
         )
         .where(builder => builder
           .where('pings.author', options.characterName)
           .orWhereIn('ping_view_permissions.neucore_group', options.neucoreGroups)
+        )
+
+      if (options.before) {
+        baseQuery = baseQuery.where('pings.sent_at', '<', options.before)
+      }
+      const pingsQuery = baseQuery.clone()
+        .leftJoin(
+          'scheduled_pings',
+          'scheduled_pings.ping_id',
+          'pings.id'
+        )
+        .select<(Pings & Partial<Pick<ScheduledPings, 'scheduled_for' | 'title'>>)[]>(
+          'pings.*', 'scheduled_pings.scheduled_for', 'scheduled_pings.title'
         )
         .orderBy('pings.sent_at', 'desc')
         .limit(100)
+      const countQuery = baseQuery.clone().count({ count: 'id' })
 
-      if (options.before) {
-        query = query.where('pings.sent_at', '<', options.before)
+      const [count, pings] = await Promise.all([
+        countQuery as Promise<{ count?: string | number | undefined }[]>,
+        pingsQuery,
+      ])
+      return {
+        pings: pings.map(rawToPing),
+        remaining: count.length > 0 && typeof count[0].count === 'number'
+          ? pings.length - count[0].count
+          : 0,
       }
-      const pings = (await query as Pings[]).map(rawToPing)
-
-      const oldestPing = pings.length > 0 ? pings[pings.length - 1] : null
-
-      if (!oldestPing) {
-        return { pings, remaining: 0 }
-      }
-      const remaining = (await trx('pings')
-        .count({ count: 'pings.id' })
-        .leftJoin(
-          'ping_view_permissions',
-          'pings.slack_channel_id',
-          'ping_view_permissions.slack_channel_id'
-        )
-        .where('sent_at', '<', new Date(oldestPing.sentAt))
-        .where(builder => builder
-          .where('pings.author', options.characterName)
-          .orWhereIn('ping_view_permissions.neucore_group', options.neucoreGroups)
-        ))[0].count
-
-      if (typeof remaining !== 'number') {
-        return { pings, remaining: 0 }
-      }
-      return { pings, remaining }
     })
   }
 
