@@ -80,7 +80,7 @@ export function DateTimeInput({
   return (
     <Row {...rowProps}>
       <Form.Group as={Col} controlId="date" xs={6} className="mb-3">
-        <Form.Label>Date ({dateFormat})</Form.Label>
+        <Form.Label className="text-nowrap">Date ({dateFormat})</Form.Label>
         <Form.Control
           type="date"
           value={dateInputText}
@@ -90,7 +90,7 @@ export function DateTimeInput({
         />
       </Form.Group>
       <Form.Group as={Col} controlId="time" xs={6} className="mb-3">
-        <Form.Label>Time ({timeFormat})</Form.Label>
+        <Form.Label className="text-nowrap">Time ({timeFormat})</Form.Label>
         <Form.Control
           type="text"
           maxLength={5}
