@@ -141,11 +141,11 @@ export function SendPings(): JSX.Element {
                 />
               </Form.Group>
 
-              <Col xs={12} className="mb-3 pe-0">
+              <Col xs={12} className="pe-0">
                 <Form.Label>Calendar Time</Form.Label>
               </Col>
 
-              <Form.Group as={Col} controlId="eveDateTime" xs={12} lg={6} className="mb-3 pe-0">
+              <Form.Group as={Col} controlId="eveDateTime" xs={12} lg={6} className="pe-0">
                 <Form.Label>
                   <Form.Check
                     inline
@@ -189,9 +189,8 @@ export function SendPings(): JSX.Element {
               </Form.Group>
             </>)}
 
-            <div className="pe-0"><hr className="mt-0" /></div>
+            {/* <div className="pe-0"><hr className="mt-0" /></div> */}
           </>)}
-
 
           <Form.Group as={Col} xs={12} className="mb-3 pe-0">
             <Form.Label>Ping Text:</Form.Label>
@@ -204,13 +203,12 @@ export function SendPings(): JSX.Element {
               onChange={handlePingTextChange}
             />
           </Form.Group>
-        </Col>
 
-        <Col xs={12} style={{ display: 'flex' }}>
-          <div style={{ flex: 1 }} />
-          <Button variant="danger" disabled={!canSend} onClick={sendPing}>
-            Send Ping
-          </Button>
+          <Col xs={12} className="d-flex justify-content-end pe-0">
+            <Button variant="danger" disabled={!canSend} onClick={sendPing}>
+              Send Ping
+            </Button>
+          </Col>
         </Col>
 
         <Modal show={showSendingDialog} size="sm" backdrop="static">
