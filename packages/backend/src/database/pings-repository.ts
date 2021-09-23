@@ -186,8 +186,6 @@ export class PingsRepository {
     characterName: string,
   }): Promise<ApiPingTemplate | null> {
     return await this.knex.transaction(async trx => {
-      console.log(options)
-
       // Remove all previously allowed groups
       await trx('ping_template_groups')
         .delete()
@@ -208,11 +206,6 @@ export class PingsRepository {
       if (updateCount !== 1) {
         throw new UnknownTemplateError(options.id)
       }
-
-      const allowedGroups = await trx('ping_template_groups')
-        .select('*')
-        .where({ template_id: options.id })
-      console.log(allowedGroups)
 
       if (options.template.allowedNeucoreGroups.length > 0) {
         await trx('ping_template_groups')
