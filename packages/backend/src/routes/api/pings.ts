@@ -1,4 +1,5 @@
 import Router from '@koa/router'
+import { Channel } from '@slack/web-api/dist/response/ConversationsListResponse'
 import { BadRequest, Forbidden, InternalServerError, NotFound, Unauthorized } from 'http-errors'
 import * as yup from 'yup'
 import {
@@ -12,13 +13,14 @@ import {
   ApiSlackChannelsResponse,
   ApiPingViewPermission,
   ApiPingsResponse,
+  ApiScheduledPingsResponse,
 } from '@ping-board/common'
 import { UserRoles, userRoles } from '../../middleware/user-roles'
 import { SlackClient, SlackRequestFailedError } from '../../slack/slack-client'
 import { NeucoreClient } from '../../neucore'
 import { dayjs } from '../../util/dayjs'
 import { PingsRepository, UnknownTemplateError } from '../../database'
-import { Channel } from '@slack/web-api/dist/response/ConversationsListResponse'
+import { extractDateQueryParam, extractQueryParam } from '../../util/extract-query-param'
 
 export function getRouter(options: {
   neucoreClient: NeucoreClient,
@@ -51,6 +53,9 @@ export function getRouter(options: {
     if (!template) {
       throw new BadRequest('unvalid template id')
     }
+    if (!!ping.scheduledFor !== !!ping.scheduledTitle) {
+      throw new BadRequest('either specify both a calendar time and title or neither of both')
+    }
     if (
       template.allowedNeucoreGroups.length > 0 &&
       !template.allowedNeucoreGroups.some(g =>
@@ -61,6 +66,7 @@ export function getRouter(options: {
     try {
       const storedPing = await options.pings.addPing({
         text: ping.text,
+        scheduledTitle: ping.scheduledTitle,
         scheduledFor: ping.scheduledFor,
         characterName: ctx.session.character.name,
         template,
@@ -85,6 +91,28 @@ export function getRouter(options: {
       }
       throw error
     }
+  })
+
+  router.get('/scheduled', userRoles.requireOneOf(UserRoles.PING), async ctx => {
+    if (!ctx.session?.character) {
+      throw new Unauthorized()
+    }
+
+    const before = extractDateQueryParam(ctx, 'before')
+    const after = extractDateQueryParam(ctx, 'after')
+    const count = extractQueryParam(ctx, 'count', v => {
+      const n = parseInt(v, 10)
+      return Number.isFinite(n) && n > 0 ? Math.ceil(n) : null
+    })
+
+    const response: ApiScheduledPingsResponse = await options.pings.getScheduledEvents({
+      characterName: ctx.session.character.name,
+      neucoreGroups: ctx.session.character.neucoreGroups.map(g => g.name),
+      before,
+      after,
+      count,
+    })
+    ctx.body = response
   })
 
   router.get('/channels', userRoles.requireOneOf(UserRoles.PING_TEMPLATES_WRITE), async ctx => {
@@ -262,6 +290,7 @@ export function getRouter(options: {
 const pingSchema = yup.object().noUnknown(true).shape({
   templateId: yup.number().required(),
   text: yup.string().min(1),
+  scheduledTitle: yup.string().min(1).notRequired(),
   scheduledFor: yup.date().notRequired(),
 })
 async function validatePingInput(

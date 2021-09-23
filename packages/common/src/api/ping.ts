@@ -24,3 +24,8 @@ export interface ApiPingsResponse {
 export type ApiScheduledPing =
   & Omit<ApiPing, 'scheduledTitle' | 'scheduledFor'>
   & Required<Pick<ApiPing, 'scheduledTitle' | 'scheduledFor'>>
+
+export interface ApiScheduledPingsResponse {
+  pings: ApiScheduledPing[]
+  remaining: number
+}
