@@ -1,7 +1,15 @@
 import { ApiPingTemplate, ApiPingTemplateInput } from '@ping-board/common'
 import clsx from 'clsx'
 import { ChangeEvent, useEffect, useState } from 'react'
-import { Alert, Button, Col, Form, Modal, Row, Table } from 'react-bootstrap'
+import {
+  Alert,
+  Button,
+  Col,
+  Form,
+  Modal,
+  Row,
+  Table,
+} from 'react-bootstrap'
 import {
   useGetAvailableNeucoreGroupsQuery,
   useGetPingChannelsQuery,
@@ -63,6 +71,9 @@ export function EditPingTemplateDialog({
   const handleSlackChannelChange = (e: ChangeEvent<HTMLSelectElement>) =>
     setEditedTemplate(t => ({ ...t, slackChannelId: e.target.value }))
 
+  const handleAllowSchedulingChange = () =>
+    setTemplateField('allowScheduling', !editedTemplate.allowScheduling)
+
   const handleNeucoreGroupSelected = (e: ChangeEvent<HTMLSelectElement>) =>
     setEditedTemplate(t => ({
       ...t,
@@ -119,6 +130,20 @@ export function EditPingTemplateDialog({
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </Form.Select>
+            </Form.Group>
+
+            <Form.Group as={Col} controlId="allowScheduling" xs={12} className="mb-3">
+              <Form.Check
+                checked={!!editedTemplate.allowScheduling}
+                onChange={handleAllowSchedulingChange}
+                label={<>
+                  Allow Showing the Ping in the Calendar
+                  <span className="d-block" style={{fontSize: '0.9rem' }}>
+                    Only users with permissions to view pings sent to the target channel will be
+                    able to see them in the calendar.
+                  </span>
+                </>}
+              />
             </Form.Group>
 
             <Form.Group as={Col} controlId="addNeucoreGroup" xs={12} className="mb-3">
@@ -248,5 +273,6 @@ function getDefaultEditedTemplate(): ApiPingTemplateInput {
     slackChannelId: '',
     template: '',
     allowedNeucoreGroups: [],
+    allowScheduling: false,
   }
 }

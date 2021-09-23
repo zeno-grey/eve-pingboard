@@ -63,6 +63,7 @@ export function ManagePingTemplates(): JSX.Element {
           <th>Name</th>
           <th>Targeted Channel</th>
           <th>Groups Allowed to Ping</th>
+          <th>Calendar Support</th>
           <th>Template</th>
           <th>Action</th>
         </tr>
@@ -88,6 +89,7 @@ export function ManagePingTemplates(): JSX.Element {
                 : t.allowedNeucoreGroups.join(', ')
               }
             </td>
+            <td>{t.allowScheduling ? 'Yes' : 'No'}</td>
             <td>
               {t.template.split('\n').map((line, i) => (
                 <div key={i}>{line}</div>
