@@ -1,4 +1,10 @@
-import { ApiEventEntry, ApiEventsResponse } from '@ping-board/common'
+import {
+  ApiEventEntry,
+  ApiEventsResponse,
+  ApiScheduledPing,
+  ApiScheduledPingsResponse,
+  isScheduledPing,
+} from '@ping-board/common'
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { RootState } from '.'
 import { eventColors } from '../pages/calendar/calendar'
@@ -11,7 +17,7 @@ export interface CalendarEntry {
   color?: typeof eventColors[number]
   baseEntry:
     | { type: 'event', event: ApiEventEntry }
-    | { type: 'ping', ping: null }
+    | { type: 'ping', ping: ApiScheduledPing }
 }
 
 interface CalendarState {
@@ -54,25 +60,45 @@ export const loadMonth = createAsyncThunk(
   async (args: { year: number, month: number }) => {
     const { from, to } = getDisplayedMonthRange(args)
 
-    let events: ApiEventEntry[] = []
-    let hasMore = true
-    // Load all pages for the given time frame
-    while (hasMore) {
-      const urlParams = new URLSearchParams({
-        ...events.length > 0
-          ? { after: events[events.length - 1].time }
-          : { after: from.toISOString() },
-        before: to.toISOString(),
-        count: '40',
-      })
-      const response = await fetch(
-        `/api/events?${urlParams.toString()}`,
-        { credentials: 'same-origin' }
-      ).then(r => r.json()) as ApiEventsResponse
-      events = [...events, ...response.events]
-      hasMore = response.remaining > 0
+    async function loadAll<R, T>(
+      baseUrl: string,
+      getLatestTimestamp: (entries: T[]) => string | null,
+      getValues: (response: R) => { values: T[], hasMore: boolean }
+    ): Promise<T[]> {
+      let data: T[] = []
+      let hasMore = true
+
+      while (hasMore) {
+        const urlParams = new URLSearchParams({
+          after: getLatestTimestamp(data) ?? from.toISOString(),
+          before: to.toISOString(),
+        })
+        const response = await fetch(
+          `${baseUrl}?${urlParams.toString()}`,
+          { credentials: 'same-origin' }
+        ).then(r => r.json()) as R
+        const values = getValues(response)
+        data = [...data, ...values.values]
+        hasMore = values.hasMore
+      }
+
+      return data
     }
-    return { cached: false, events }
+
+    const [events, pings] = await Promise.all([
+      loadAll<ApiEventsResponse, ApiEventEntry>(
+        '/api/events',
+        events => events.length > 0 ? events[events.length - 1].time : null,
+        response => ({ values: response.events, hasMore: response.remaining > 0 })
+      ),
+      loadAll<ApiScheduledPingsResponse, ApiScheduledPing>(
+        '/api/pings/scheduled',
+        pings => pings.length > 0 ? pings[pings.length - 1].scheduledFor : null,
+        response => ({ values: response.pings, hasMore: response.remaining > 0 })
+      ),
+    ])
+
+    return { cached: false, events, pings }
   },
   {
     condition: (args, { getState }) => {
@@ -106,10 +132,15 @@ export const calendarSlice = createSlice({
       if (!action.payload) {
         return
       }
-      for (const e of action.payload.events) {
-        state.events.push(calendarEntryFromEvent(e))
-      }
-      state.loadedMonths.push(monthKey)
+      const events = new Map<string, CalendarEntry>([
+        ...state.events.map(e => e.baseEntry.type === 'event'
+          ? [`event-${e.baseEntry.event.id}`, e] as const
+          : [`ping-${e.baseEntry.ping.id}`, e] as const
+        ),
+        ...action.payload.events.map(e => [`event-${e.id}`, calendarEntryFromEvent(e)] as const),
+        ...action.payload.pings.map(p => [`ping-${p.id}`, calendarEntryFromPing(p)] as const),
+      ])
+      state.events = [...events.values()]
     })
 
     // Clear state on logout to prevent leaking data that the new user should not be able to see
@@ -136,6 +167,13 @@ export const calendarSlice = createSlice({
       const eventId = action.meta.arg.originalArgs
       state.events = state.events
         .filter(e => e.baseEntry.type !== 'event' || e.baseEntry.event.id !== eventId)
+    })
+
+    // Add calendar entries for sent pings
+    .addMatcher(apiSlice.endpoints.addPing.matchFulfilled, (state, action) => {
+      if (isScheduledPing(action.payload)) {
+        state.events = [...state.events, calendarEntryFromPing(action.payload)]
+      }
     })
     ,
 })
@@ -167,6 +205,18 @@ function calendarEntryFromEvent(event: ApiEventEntry): CalendarEntry {
   }
 }
 
+function calendarEntryFromPing(ping: ApiScheduledPing): CalendarEntry {
+  return {
+    dateTime: ping.scheduledFor,
+    title: ping.scheduledTitle,
+    baseEntry: { type: 'ping', ping },
+  }
+}
+
 export const selectCalendarEvents = (state: RootState): CalendarEntry[] => state.calendar.events
 export const selectIsLoadingCalendarEvents = (state: RootState): boolean =>
   state.calendar.loadingMonths.length > 0
+
+export const {
+  clearCalendarEntries,
+} = calendarSlice.actions

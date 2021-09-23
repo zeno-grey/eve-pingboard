@@ -112,7 +112,13 @@ export function Calendar({
                   onClick={() => handleClickEntry(e)}
                 >
                   <Time time={dayjs.utc(e.dateTime)} asLink format="HH:mm" className="me-1" />
-                  <span>{e.title}</span>
+                  <span>
+                    <i className={{
+                      event: 'bi-stopwatch',
+                      ping: 'bi-broadcast-pin',
+                    }[e.baseEntry.type]} />{' '}
+                    {e.title}
+                  </span>
                 </div>
               ))}
             </div>

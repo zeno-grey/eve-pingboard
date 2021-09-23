@@ -5,7 +5,7 @@ import { Button, Container } from 'react-bootstrap'
 import { Redirect, useRouteMatch } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../hooks/redux'
 import { useGetUserQuery } from '../../store'
-import { loadMonth, selectCalendarEvents } from '../../store/calendar-slice'
+import { clearCalendarEntries, loadMonth, selectCalendarEvents } from '../../store/calendar-slice'
 import { Calendar } from './calendar'
 
 export function CalendarPage(): JSX.Element {
@@ -27,6 +27,10 @@ export function CalendarPage(): JSX.Element {
     setCurrentMonth(m => m.add(dayjs.duration({ months: 1 })))
   const handlePrevMonthClicked = () =>
     setCurrentMonth(m => m.subtract(dayjs.duration({ months: 1 })))
+  const handleReloadClicked = () => {
+    dispatch(clearCalendarEntries())
+    dispatch(loadMonth({ month, year }))
+  }
 
   const { url } = useRouteMatch()
   if (!me.isFetching) {
@@ -55,7 +59,10 @@ export function CalendarPage(): JSX.Element {
         <Button size="sm" variant="outline-light" className="me-2" onClick={handleNextMonthClicked}>
           <i className="bi-chevron-right" />
         </Button>
-        <h4 className="h-100 mb-0 align-middle">{currentMonth.format('MMMM YYYY')}</h4>
+        <h4 className="h-100 mb-0 me-2 align-middle">{currentMonth.format('MMMM YYYY')}</h4>
+        <Button size="sm" variant="outline-light" onClick={handleReloadClicked}>
+          <i className="bi-arrow-clockwise" /> Reload
+        </Button>
       </div>
       <Calendar
         className="flex-fill mb-2"

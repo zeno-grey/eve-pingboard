@@ -1,8 +1,9 @@
-import { ApiEventEntry } from '@ping-board/common'
+import { ApiEventEntry, ApiScheduledPing } from '@ping-board/common'
 import { Col, Modal, ModalProps, Row } from 'react-bootstrap'
 import { ConstellationLink } from '../../components/constellation-link'
 import { RegionLink } from '../../components/region-link'
 import { RelativeTime } from '../../components/relative-time'
+import { SlackMessage } from '../../components/slack-message'
 import { SolarSystemLink } from '../../components/solar-system-link'
 import { Time } from '../../components/time'
 import { CalendarEntry } from '../../store/calendar-slice'
@@ -19,15 +20,25 @@ export function CalendarEntryDialog({
     <Modal {...modalProps}>
       <Modal.Header closeButton>
         <Modal.Title>
+          <i className={{
+            event: 'bi-stopwatch',
+            ping: 'bi-broadcast-pin',
+          }[entry?.baseEntry.type ?? 'event']} />{' '}
           {entry?.title}
-          {entry?.baseEntry.type === 'event' && (<>
-            <h6 className="m-0">Timerboard Event</h6>
-          </>)}
+          <h6 className="m-0">
+            {{
+              event: 'Timerboard Event',
+              ping: 'Ping',
+            }[entry?.baseEntry.type ?? 'event']}
+          </h6>
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {entry?.baseEntry.type === 'event' && (
           <CalendarEntryEventBody event={entry.baseEntry.event} />
+        )}
+        {entry?.baseEntry.type === 'ping' && (
+          <CalendarEntryPingBody ping={entry.baseEntry.ping} />
         )}
       </Modal.Body>
     </Modal>
@@ -101,6 +112,40 @@ function CalendarEntryEventBody({ event }: { event: ApiEventEntry }): JSX.Elemen
           <>{line}<br /></>
         ))}</Col>
       </>)}
+    </Row>
+  )
+}
+function CalendarEntryPingBody({ ping }: { ping: ApiScheduledPing }): JSX.Element {
+  return (
+    <Row className="mt-n2">
+      <Col xs={3}>EVE Time</Col>
+      <Col xs={9}>
+        <Time
+          time={dayjs.utc(ping.scheduledFor)}
+          asLink
+          format="YYYY-MM-DD HH:mm"
+        />
+      </Col>
+
+      <Col xs={3}>Local Time</Col>
+      <Col xs={9}>
+        <Time time={ping.scheduledFor} /> (
+          <RelativeTime time={ping.scheduledFor} />
+        )
+      </Col>
+
+      <Col xs={3}>Channel</Col>
+      <Col xs={9}>{ping.slackChannelName}</Col>
+
+      <Col xs={3}>Sent By</Col>
+      <Col xs={9}>{ping.author}</Col>
+
+      <hr className="my-1" />
+
+      <Col xs={3}>Ping Text</Col>
+      <Col xs={9}>
+        <SlackMessage text={ping.text} />
+      </Col>
     </Row>
   )
 }
