@@ -18,6 +18,7 @@ export function SendPings(): JSX.Element {
   const timeInput = useAbsoluteRelativeTimeInput({
     time: { relative: dayjs.duration(0) },
   })
+  const [calendarEntryTitle, setCalendarEntryTitle] = useState('')
 
   const [selectedTemplate, setSelectedTemplate] = useState<ApiPingTemplate | null>(null)
   const [pingText, setPingText] = useState<string>('')
@@ -76,9 +77,10 @@ export function SendPings(): JSX.Element {
       postPing({
         templateId: selectedTemplate.id,
         text: pingText,
-        scheduledFor: selectedTemplate.allowScheduling && addPingToCalendar
-          ? timeInput.absoluteTime.toISOString()
-          : undefined,
+        ...selectedTemplate.allowScheduling && addPingToCalendar ? {
+          scheduledTitle: calendarEntryTitle,
+          scheduledFor: timeInput.absoluteTime.toISOString(),
+        } : {},
       })
       setShowSendingDialog(true)
     }
@@ -119,9 +121,9 @@ export function SendPings(): JSX.Element {
           </ListGroup>
         </Form.Group>
 
-        <Col as={Row} xs={12} md={8} className="mb-3">
+        <Col as={Row} xs={12} md={8} className="mb-3 px-0">
           {!!selectedTemplate?.allowScheduling && (<>
-            <Form.Group as={Col} controlId="schedule" xs={12} className="mb-3">
+            <Form.Group as={Col} controlId="schedule" xs={12} className="mb-3 pe-0">
               <Form.Label>Ping Options</Form.Label>
               <Form.Check
                 checked={addPingToCalendar}
@@ -131,11 +133,19 @@ export function SendPings(): JSX.Element {
             </Form.Group>
 
             {addPingToCalendar && (<>
-              <Col xs={12}>
+              <Form.Group as={Col} controlid="calendarTitle" xs={12} className="mb-3 pe-0">
+                <Form.Label>Calendar Entry Title</Form.Label>
+                <Form.Control
+                  value={calendarEntryTitle}
+                  onChange={e => setCalendarEntryTitle(e.target.value)}
+                />
+              </Form.Group>
+
+              <Col xs={12} className="mb-3 pe-0">
                 <Form.Label>Calendar Time</Form.Label>
               </Col>
 
-              <Form.Group as={Col} controlId="eveDateTime" xs={12} lg={6}>
+              <Form.Group as={Col} controlId="eveDateTime" xs={12} lg={6} className="mb-3 pe-0">
                 <Form.Label>
                   <Form.Check
                     inline
@@ -156,7 +166,7 @@ export function SendPings(): JSX.Element {
                 />
               </Form.Group>
 
-              <Form.Group as={Col} controlId="relativeTime" xs={12} lg={6}>
+              <Form.Group as={Col} controlId="relativeTime" xs={12} lg={6} className="mb-3 pe-0">
                 <Form.Label>
                   <Form.Check
                     inline
@@ -178,9 +188,12 @@ export function SendPings(): JSX.Element {
                 />
               </Form.Group>
             </>)}
+
+            <div className="pe-0"><hr className="mt-0" /></div>
           </>)}
 
-          <Form.Group as={Col} xs={12} className="mb-3">
+
+          <Form.Group as={Col} xs={12} className="mb-3 pe-0">
             <Form.Label>Ping Text:</Form.Label>
             <Form.Control
               as="textarea"
