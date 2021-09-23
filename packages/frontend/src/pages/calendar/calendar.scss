@@ -1,4 +1,4 @@
-@import '../../custom.scss';
+@import '../../theme.scss';
 
 @mixin calendar-event-color-variant($name, $background) {
   &.#{$name} {
