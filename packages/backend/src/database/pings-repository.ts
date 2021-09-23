@@ -154,6 +154,7 @@ export class PingsRepository {
           slack_channel_id: options.input.slackChannelId,
           slack_channel_name: options.input.slackChannelName,
           template: options.input.template,
+          allow_scheduling: !!options.input.allowScheduling,
           updated_at: new Date(),
           updated_by: options.characterName,
         })
@@ -198,6 +199,7 @@ export class PingsRepository {
           slack_channel_id: options.template.slackChannelId,
           slack_channel_name: options.template.slackChannelName,
           template: options.template.template,
+          allow_scheduling: !!options.template.allowScheduling,
           updated_at: new Date(),
           updated_by: options.characterName,
         })
@@ -316,6 +318,7 @@ function rawToPingTemplate(
     slackChannelName: template.slack_channel_name,
     template: template.template,
     allowedNeucoreGroups: groups.map(g => g.group),
+    allowScheduling: template.allow_scheduling,
     updatedAt: template.updated_at.toISOString(),
     updatedBy: template.updated_by,
   }

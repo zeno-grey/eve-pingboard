@@ -5,6 +5,7 @@ export interface ApiPingTemplateInput {
   slackChannelId: string
   template: string
   allowedNeucoreGroups: string[]
+  allowScheduling?: boolean
 }
 
 export interface ApiPingTemplate extends ApiPingTemplateInput {

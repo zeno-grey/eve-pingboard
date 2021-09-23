@@ -277,6 +277,7 @@ const templateSchema = yup.object().noUnknown(true).shape({
   slackChannelId: yup.string().min(1),
   template: yup.string().min(0),
   allowedNeucoreGroups: yup.array(yup.string().min(1)).min(0),
+  allowScheduling: yup.boolean().notRequired(),
 })
 async function validateTemplateInput(
   raw: unknown
