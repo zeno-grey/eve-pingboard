@@ -4,7 +4,7 @@ import * as yup from 'yup'
 import { ApiEventEntryInput, ApiEventsResponse } from '@ping-board/common'
 import { userRoles, UserRoles } from '../../middleware/user-roles'
 import { EventsRepository } from '../../database'
-import { Context } from 'koa'
+import { extractQueryParam, extractDateQueryParam } from '../../util/extract-query-param'
 
 export function getRouter(options: {
   events: EventsRepository,
@@ -16,8 +16,8 @@ export function getRouter(options: {
       const n = parseInt(v, 10)
       return Number.isFinite(n) && n > 0 ? Math.ceil(n) : null
     })
-    const before = extractQueryParamDate(ctx, 'before')
-    const after = extractQueryParamDate(ctx, 'after')
+    const before = extractDateQueryParam(ctx, 'before')
+    const after = extractDateQueryParam(ctx, 'after')
     const [events, eventCount] = await Promise.all([
       options.events.getEvents({ before, after, count }),
       options.events.getNumberOfEvents({ before, after }),
@@ -85,33 +85,4 @@ async function validateEventInput(
     return eventSchema.cast(raw) as unknown as ApiEventEntryInput
   }
   throw new BadRequest('invalid input')
-}
-
-function extractQueryParamDate(ctx: Context, name: string): Date | null {
-  const value = extractQueryParam(ctx, name)
-  if (value) {
-    const date = new Date(value)
-    if (!isNaN(date.getTime())) {
-      return date
-    }
-  }
-  return null
-}
-
-function extractQueryParam(ctx: Context, name: string): string | null
-function extractQueryParam<T>(
-  ctx: Context, name: string, map: (value: string) => T | null
-): T | null
-function extractQueryParam<T>(
-  ctx: Context, name: string, map?: (value: string) => T | null
-): T | null {
-  const param = ctx.query[name]
-  if (typeof param === 'string') {
-    if (map) return map(param)
-    return param as unknown as T
-  } else if (Array.isArray(param) && param.length > 0) {
-    if (map) return map(param[0])
-    return param[0] as unknown as T
-  }
-  return null
 }
