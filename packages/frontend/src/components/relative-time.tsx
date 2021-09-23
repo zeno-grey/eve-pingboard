@@ -9,7 +9,9 @@ export function RelativeTime({
 }: RelativeTimeProps): JSX.Element {
   const [relative, setRelative] = useState(dayjs(time).fromNow())
   useEffect(() => {
-    const interval = setInterval(() => setRelative(dayjs(time).fromNow()))
+    const interval = setInterval(() => {
+      setRelative(dayjs(time).fromNow())
+    }, 1000)
     return () => clearInterval(interval)
   }, [time])
 
