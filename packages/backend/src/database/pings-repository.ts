@@ -3,12 +3,14 @@ import {
   ApiPingTemplate,
   ApiPingTemplateInput,
   ApiPingViewPermission,
+  ApiScheduledPing,
 } from '@ping-board/common'
 import { Knex } from 'knex'
 import { PingTemplateGroups } from './models/ping-allowed-groups'
 import { PingTemplates } from './models/ping-templates'
 import { PingViewPermissions } from './models/ping-view-permissions'
 import { Pings } from './models/pings'
+import { ScheduledPings } from './models/scheduled-pings'
 
 export class UnknownTemplateError extends Error {
   constructor(templateId: number) {
@@ -87,6 +89,7 @@ export class PingsRepository {
 
   async addPing(options: {
     text: string,
+    scheduledTitle?: string,
     scheduledFor?: string,
     template: ApiPingTemplate,
     characterName: string,
@@ -100,15 +103,23 @@ export class PingsRepository {
         slack_channel_name: options.template.slackChannelName,
         text: options.text,
       }))[0]
-      const storedPing = (await trx('pings').select('*').where({ id: pingId }))[0]
+      const storedPing = (await trx('pings')
+        .select<(Pings & Partial<Pick<ScheduledPings, 'scheduled_for' | 'title'>>)[]>(
+          'pings.*', 'scheduled_pings.scheduled_for', 'scheduled_pings.title'
+        )
+        .leftJoin('scheduled_pings', 'pings.id', 'scheduled_pings.ping_id')
+        .where({ id: pingId })
+      )[0]
+
       if (!storedPing) {
         throw new PingCreationFailedError()
       }
 
-      if (options.template.allowScheduling && options.scheduledFor) {
+      if (options.template.allowScheduling && options.scheduledFor && options.scheduledTitle) {
         const date = new Date(options.scheduledFor)
         await trx('scheduled_pings').insert({
           ping_id: pingId,
+          title: options.scheduledTitle,
           scheduled_for: date,
         })
       }
@@ -299,12 +310,18 @@ export class PingsRepository {
   }
 }
 
-function rawToPing(ping: Pings): ApiPing {
+function rawToPing(ping: Pings & Pick<ScheduledPings, 'scheduled_for' | 'title'>): ApiScheduledPing
+function rawToPing(ping: Pings & Partial<Pick<ScheduledPings, 'scheduled_for' | 'title'>>): ApiPing
+function rawToPing(
+  ping: Pings & Partial<Pick<ScheduledPings, 'scheduled_for' | 'title'>>
+): ApiPing | ApiScheduledPing {
   return {
     id: ping.id,
     text: ping.text,
     slackChannelId: ping.slack_channel_id,
     slackChannelName: ping.slack_channel_name,
+    scheduledTitle: ping.title,
+    scheduledFor: ping.scheduled_for?.toISOString(),
     author: ping.author,
     sentAt: ping.sent_at.toISOString(),
   }

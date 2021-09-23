@@ -1,5 +1,6 @@
 export interface ScheduledPings {
   ping_id: number
+  title: string
   scheduled_for: Date
 }
 

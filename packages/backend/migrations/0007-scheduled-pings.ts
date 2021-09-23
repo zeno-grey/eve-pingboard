@@ -4,6 +4,7 @@ export async function up(knex: Knex): Promise<void> {
   await knex.schema
     .createTable('scheduled_pings', table => {
       table.integer('ping_id').unsigned().primary().references('id').inTable('pings')
+      table.string('title', 255)
       table.dateTime('scheduled_for').notNullable()
     })
 }
