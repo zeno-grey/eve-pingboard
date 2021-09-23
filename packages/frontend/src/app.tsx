@@ -28,7 +28,7 @@ export default function App(): JSX.Element {
             {pages.map(page => (
               <Route key={page.href} path={page.href} component={page.component} />
             ))}
-            <Redirect from="/" to="/timers" />
+            <Redirect from="/" to="/calendar" />
           </Switch>
         </main>
         <footer>
