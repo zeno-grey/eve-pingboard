@@ -87,6 +87,7 @@ export class PingsRepository {
 
   async addPing(options: {
     text: string,
+    scheduledFor?: string,
     template: ApiPingTemplate,
     characterName: string,
     runInTransaction?: (ping: ApiPing) => void | Promise<void>
@@ -103,6 +104,15 @@ export class PingsRepository {
       if (!storedPing) {
         throw new PingCreationFailedError()
       }
+
+      if (options.template.allowScheduling && options.scheduledFor) {
+        const date = new Date(options.scheduledFor)
+        await trx('scheduled_pings').insert({
+          ping_id: pingId,
+          scheduled_for: date,
+        })
+      }
+
       const apiPing = rawToPing(storedPing)
       if (options.runInTransaction) {
         await options.runInTransaction(apiPing)

@@ -1,6 +1,7 @@
 export interface ApiPingInput {
   templateId: number
   text: string
+  scheduledFor?: string
 }
 
 export interface ApiPing {

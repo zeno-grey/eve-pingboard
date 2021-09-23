@@ -61,6 +61,7 @@ export function getRouter(options: {
     try {
       const storedPing = await options.pings.addPing({
         text: ping.text,
+        scheduledFor: ping.scheduledFor,
         characterName: ctx.session.character.name,
         template,
         runInTransaction: async p => {
@@ -261,6 +262,7 @@ export function getRouter(options: {
 const pingSchema = yup.object().noUnknown(true).shape({
   templateId: yup.number().required(),
   text: yup.string().min(1),
+  scheduledFor: yup.date().notRequired(),
 })
 async function validatePingInput(
   raw: unknown
