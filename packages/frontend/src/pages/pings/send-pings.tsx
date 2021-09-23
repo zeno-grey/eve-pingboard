@@ -1,12 +1,23 @@
 import { ApiPingTemplate } from '@ping-board/common'
+import clsx from 'clsx'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { Alert, Button, Col, Form, ListGroup, Modal, Row, Spinner } from 'react-bootstrap'
 import { Prompt } from 'react-router-dom'
+import { DateTimeInput } from '../../components/date-time-input'
+import { RelativeTimeInput } from '../../components/relative-time-input'
+import { useAbsoluteRelativeTimeInput } from '../../hooks/use-absolute-relative-time-input'
 import { useGetPingTemplatesQuery, useAddPingMutation } from '../../store'
+import { dayjs } from '../../utils/dayjs'
+import './send-pings.scss'
 
 export function SendPings(): JSX.Element {
   const pingTemplates = useGetPingTemplatesQuery()
   const [postPing, postPingState] = useAddPingMutation()
+
+  const [addPingToCalendar, setAddPingToCalendar] = useState(false)
+  const timeInput = useAbsoluteRelativeTimeInput({
+    time: { relative: dayjs.duration(0) },
+  })
 
   const [selectedTemplate, setSelectedTemplate] = useState<ApiPingTemplate | null>(null)
   const [pingText, setPingText] = useState<string>('')
@@ -65,13 +76,16 @@ export function SendPings(): JSX.Element {
       postPing({
         templateId: selectedTemplate.id,
         text: pingText,
+        scheduledFor: selectedTemplate.allowScheduling && addPingToCalendar
+          ? timeInput.absoluteTime.toISOString()
+          : undefined,
       })
       setShowSendingDialog(true)
     }
   }
 
   return (
-    <Form>
+    <Form className="send-pings">
       <Prompt
         when={pingTextModified}
         message="You haven't sent your ping yet. Are you sure you want to leave?"
@@ -90,13 +104,12 @@ export function SendPings(): JSX.Element {
         </Col>
 
         <Form.Group as={Col} xs={12} md={4} className="mb-3">
-          <Form.Label>Send ping to group:</Form.Label>
+          <Form.Label>Send Ping to Group:</Form.Label>
           <ListGroup>
             {pingTemplates.data?.templates.map(t => (
               <ListGroup.Item key={t.id}
                 type="button"
                 action
-                // variant="dark"
                 active={t === selectedTemplate}
                 onClick={() => handlePingGroupChange(t)}
               >
@@ -106,17 +119,79 @@ export function SendPings(): JSX.Element {
           </ListGroup>
         </Form.Group>
 
-        <Form.Group as={Col} xs={12} md={8} className="mb-3">
-          <Form.Label>Ping text:</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={15}
-            disabled={!selectedTemplate}
-            placeholder={selectedTemplate ? '' : 'Please select a channel first.'}
-            value={selectedTemplate ? pingText : ''}
-            onChange={handlePingTextChange}
-          />
-        </Form.Group>
+        <Col as={Row} xs={12} md={8} className="mb-3">
+          {!!selectedTemplate?.allowScheduling && (<>
+            <Form.Group as={Col} controlId="schedule" xs={12} className="mb-3">
+              <Form.Label>Ping Options</Form.Label>
+              <Form.Check
+                checked={addPingToCalendar}
+                onChange={() => setAddPingToCalendar(add => !add)}
+                label="Add this Ping to the Calendar"
+              />
+            </Form.Group>
+
+            {addPingToCalendar && (<>
+              <Col xs={12}>
+                <Form.Label>Calendar Time</Form.Label>
+              </Col>
+
+              <Form.Group as={Col} controlId="eveDateTime" xs={12} lg={6}>
+                <Form.Label>
+                  <Form.Check
+                    inline
+                    label="Use EVE Date and Time"
+                    name="eveDateTimeMode"
+                    type="radio"
+                    onChange={() => timeInput.handleChangeInputMode('absolute')}
+                    id="absolute"
+                    checked={timeInput.inputMode === 'absolute'}
+                  />
+                </Form.Label>
+                <DateTimeInput
+                  value={timeInput.absoluteTime}
+                  onChange={timeInput.handleAbsoluteDateChange}
+                  className={clsx(
+                    'time-mode-input',
+                    timeInput.inputMode !== 'absolute' && 'inactive-time-mode')}
+                />
+              </Form.Group>
+
+              <Form.Group as={Col} controlId="relativeTime" xs={12} lg={6}>
+                <Form.Label>
+                  <Form.Check
+                    inline
+                    label="Use Relative Time"
+                    name="eveDateTimeMode"
+                    type="radio"
+                    onChange={() => timeInput.handleChangeInputMode('relative')}
+                    id="relative"
+                    checked={timeInput.inputMode === 'relative'}
+                  />
+                </Form.Label>
+                <RelativeTimeInput
+                  value={timeInput.relativeTime}
+                  onChange={timeInput.handleRelativeDateChange}
+                  className={clsx(
+                    'time-mode-input',
+                    timeInput.inputMode !== 'relative' && 'inactive-time-mode'
+                  )}
+                />
+              </Form.Group>
+            </>)}
+          </>)}
+
+          <Form.Group as={Col} xs={12} className="mb-3">
+            <Form.Label>Ping Text:</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={15}
+              disabled={!selectedTemplate}
+              placeholder={selectedTemplate ? '' : 'Please select a channel first.'}
+              value={selectedTemplate ? pingText : ''}
+              onChange={handlePingTextChange}
+            />
+          </Form.Group>
+        </Col>
 
         <Col xs={12} style={{ display: 'flex' }}>
           <div style={{ flex: 1 }} />
