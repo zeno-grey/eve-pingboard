@@ -1,15 +1,14 @@
 import { ApiEventEntry, ApiEventEntryInput } from '@ping-board/common'
 import clsx from 'clsx'
-import { ChangeEvent, useCallback, useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import { DateTimeInput } from '../../components/date-time-input'
 import { RelativeTimeInput } from '../../components/relative-time-input'
-import { Dayjs, dayjs, Duration } from '../../utils/dayjs'
+import { useAbsoluteRelativeTimeInput } from '../../hooks/use-absolute-relative-time-input'
+import { dayjs } from '../../utils/dayjs'
 import './edit-event-dialog.scss'
 
-interface EditedEvent extends Omit<ApiEventEntryInput, 'time'> {
-  time: { relative: Duration } | { fixed: Dayjs }
-}
+type EditedEvent = Omit<ApiEventEntryInput, 'time'>
 
 const priorities = ['Low', 'Medium', 'High', 'Critical']
 const structureTypes: [value: string, title: string][] = [
@@ -50,44 +49,26 @@ export function EditEventDialog({
 }: EditEventDialogProps): JSX.Element {
   const [editedEvent, setEditedEvent] = useState<EditedEvent>(getDefaultEditedEvent())
   useEffect(() => setEditedEvent(event
-    ? { ...event, time: { fixed: dayjs(event.time).utc() } }
+    ? { ...event }
     : getDefaultEditedEvent()
   ), [event])
+
+  const timeInput = useAbsoluteRelativeTimeInput({
+    time: event
+      ? { absolute: dayjs.utc(event.time) }
+      : { relative: dayjs.duration(0) },
+  })
 
   const canSave = Object.entries(editedEvent ?? {}).every(([k, v]) => k === 'notes' || !!v)
   const save = () => {
     if (canSave && onSave) {
       onSave({
         ...editedEvent,
-        time: 'fixed' in editedEvent.time
-          ? editedEvent.time.fixed.toISOString()
-          : dayjs().add(editedEvent.time.relative).utc().toISOString(),
+        time: timeInput.absoluteTime.toISOString(),
       })
       setEditedEvent(getDefaultEditedEvent())
     }
   }
-
-  const calculateTimes = useCallback((time: EditedEvent['time']) => {
-    if ('fixed' in time) {
-      return {
-        absolute: time.fixed,
-        relative: dayjs.duration(time.fixed.diff(dayjs())),
-      }
-    } else {
-      return {
-        absolute: dayjs().add(time.relative).utc(),
-        relative: time.relative,
-      }
-    }
-  }, [])
-  const [times, setTimes] = useState<ReturnType<typeof calculateTimes>>(
-    () => calculateTimes(editedEvent.time)
-  )
-  useEffect(() => {
-    const interval = setInterval(() => setTimes(calculateTimes(editedEvent.time)), 1000)
-    setTimes(calculateTimes(editedEvent.time))
-    return () => clearInterval(interval)
-  }, [calculateTimes, editedEvent.time])
 
   const isNewEvent = typeof event?.id !== 'number'
   const lastEdited = !isNewEvent && [
@@ -96,24 +77,7 @@ export function EditEventDialog({
       ? `at ${dayjs(event.updatedAt).format('llll')} (${dayjs(event.updatedAt).fromNow()})`
       : 'unknown',
   ].join(' ')
-  const usesAbsoluteTime = 'fixed' in editedEvent.time
-
-  const handleChangeTimeMode = (mode: 'absolute' | 'relative') => {
-    const { time } = editedEvent
-    if (mode === 'absolute' && 'relative' in time) {
-      setEditedEvent(e => ({ ...e, time: { fixed: dayjs().add(time.relative).utc() } }))
-    } else  if (mode === 'relative' && 'fixed' in time) {
-      setEditedEvent(e => ({ ...e, time: { relative: dayjs.duration(time.fixed.diff(dayjs())) } }))
-    }
-  }
-
-  const handleAbsoluteDateChange = (fixed: Dayjs) => {
-    setEditedEvent(e => ({ ...e, time: { fixed }}))
-  }
-
-  const handleRelativeDateChange = (relative: Duration) => {
-    setEditedEvent(e => ({ ...e, time: { relative }}))
-  }
+  const usesAbsoluteTime = timeInput.inputMode === 'absolute'
 
   const setEventField = <T extends keyof EditedEvent>(field: T, value: EditedEvent[T]) => {
     setEditedEvent(e => ({ ...e, [field]: value }))
@@ -237,14 +201,14 @@ export function EditEventDialog({
                   label="Use EVE Date and Time"
                   name="eveDateTimeMode"
                   type="radio"
-                  onChange={() => handleChangeTimeMode('absolute')}
+                  onChange={() => timeInput.handleChangeInputMode('absolute')}
                   id="absolute"
                   checked={usesAbsoluteTime}
                 />
               </Form.Label>
               <DateTimeInput
-                value={times.absolute}
-                onChange={handleAbsoluteDateChange}
+                value={timeInput.absoluteTime}
+                onChange={timeInput.handleAbsoluteDateChange}
                 className={clsx('time-mode-input', !usesAbsoluteTime && 'inactive-time-mode')}
               />
             </Form.Group>
@@ -256,14 +220,14 @@ export function EditEventDialog({
                   label="Use Relative Time"
                   name="eveDateTimeMode"
                   type="radio"
-                  onChange={() => handleChangeTimeMode('relative')}
+                  onChange={() => timeInput.handleChangeInputMode('relative')}
                   id="relative"
                   checked={!usesAbsoluteTime}
                 />
               </Form.Label>
               <RelativeTimeInput
-                value={times.relative}
-                onChange={handleRelativeDateChange}
+                value={timeInput.relativeTime}
+                onChange={timeInput.handleRelativeDateChange}
                 className={clsx('time-mode-input', usesAbsoluteTime && 'inactive-time-mode')}
               />
             </Form.Group>
@@ -337,7 +301,6 @@ function getDefaultEditedEvent(): EditedEvent {
     structure: '',
     type: '',
     standing: '',
-    time: { relative: dayjs.duration(0) },
     result: 'No data',
     notes: '',
   }
