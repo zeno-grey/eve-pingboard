@@ -11,7 +11,10 @@ import { Calendar } from './calendar'
 export function CalendarPage(): JSX.Element {
   const dispatch = useAppDispatch()
   const me = useGetUserQuery()
-  const canRead = me.data?.isLoggedIn && me.data.character.roles.includes(UserRoles.EVENTS_READ)
+  const canRead = me.data?.isLoggedIn && (
+    me.data.character.roles.includes(UserRoles.EVENTS_READ) ||
+    me.data.character.roles.includes(UserRoles.PING)
+  )
 
   const events = useAppSelector(selectCalendarEvents)
 
