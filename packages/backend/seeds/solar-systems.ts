@@ -32,11 +32,9 @@ export async function seed(knex: Knex): Promise<void> {
     }
   }).filter((s): s is Systems => !!s.constellation && !!s.region)
 
-  await knex.transaction(async trx => {
-    console.log('Dropping old systems')
-    await trx<Systems>('systems').delete()
-    console.log(`Inserting ${solarSystems.length} new systems`)
-    await trx<Systems>('systems').insert(solarSystems)
-  })
+  await knex('systems')
+    .insert(solarSystems)
+    .onConflict('name').merge()
+
   console.log('Done')
 }
