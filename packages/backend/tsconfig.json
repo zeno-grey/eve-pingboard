@@ -8,7 +8,10 @@
     "outDir": "build"
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "migrations/*",
+    "seeds/*",
+    "knexfile.ts"
   ],
   "references": [
     {
