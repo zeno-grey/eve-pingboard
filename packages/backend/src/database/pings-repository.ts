@@ -42,15 +42,13 @@ export class PingsRepository {
   }): Promise<{ pings: ApiPing[], remaining: number }> {
     return await this.knex.transaction(async trx => {
       let baseQuery = trx('pings')
-        .distinct('pings.id')
-        .leftJoin(
-          'ping_view_permissions',
-          'ping_view_permissions.slack_channel_id',
-          'pings.slack_channel_id'
-        )
         .where(builder => builder
           .where('pings.author', options.characterName)
-          .orWhereIn('ping_view_permissions.neucore_group', options.neucoreGroups)
+          .orWhereIn('pings.slack_channel_id', builder => builder
+            .from('ping_view_permissions')
+            .select('ping_view_permissions.slack_channel_id')
+            .whereIn('ping_view_permissions.neucore_group', options.neucoreGroups)
+          )
         )
 
       if (options.before) {
@@ -91,16 +89,14 @@ export class PingsRepository {
   }): Promise<{ pings: ApiScheduledPing[], remaining: number }> {
     return await this.knex.transaction(async trx => {
       let baseQuery = trx('scheduled_pings')
-        .distinct('pings.id')
         .innerJoin('pings', 'pings.id', 'scheduled_pings.ping_id')
-        .leftJoin(
-          'ping_view_permissions',
-          'ping_view_permissions.slack_channel_id',
-          'pings.slack_channel_id'
-        )
         .where(builder => builder
           .where('pings.author', options.characterName)
-          .orWhereIn('ping_view_permissions.neucore_group', options.neucoreGroups)
+          .orWhereIn('pings.slack_channel_id', builder => builder
+            .from('ping_view_permissions')
+            .select('ping_view_permissions.slack_channel_id')
+            .whereIn('ping_view_permissions.neucore_group', options.neucoreGroups)
+          )
         )
 
       if (options.before) {

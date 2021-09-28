@@ -9,3 +9,4 @@ services:
       MARIADB_DATABASE: "pingboard"
       MARIADB_USER: "pingboard"
       MARIADB_PASSWORD: "pingboard"
+    command: mysqld --sql-mode="STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION,ONLY_FULL_GROUP_BY"
