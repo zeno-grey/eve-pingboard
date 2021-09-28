@@ -76,10 +76,16 @@ export const loadMonth = createAsyncThunk(
         const response = await fetch(
           `${baseUrl}?${urlParams.toString()}`,
           { credentials: 'same-origin' }
-        ).then(r => r.json()) as R
-        const values = getValues(response)
-        data = [...data, ...values.values]
-        hasMore = values.hasMore
+        )
+        if (response.status === 401) {
+          // we don't have access to this resource, but it's okay to fail and assume no data here
+          hasMore = false
+        } else {
+          const responseData = await response.json() as R
+          const values = getValues(responseData)
+          data = [...data, ...values.values]
+          hasMore = values.hasMore
+        }
       }
 
       return data
