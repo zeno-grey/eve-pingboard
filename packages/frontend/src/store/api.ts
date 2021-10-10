@@ -13,6 +13,7 @@ import {
   ApiPingViewPermissions,
   ApiPingViewPermissionsByGroupInput,
   ApiSlackChannelsResponse,
+  ApiSolarSystemsResponse,
 } from '@ping-board/common'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/dist/query/react'
 
@@ -57,6 +58,9 @@ export const apiSlice = createApi({
     deleteEvent: builder.mutation<void, number>({
       query: id => ({ url: `api/events/${id}`, method: 'DELETE' }),
       invalidatesTags: (result, _, arg) => result ? [{ type: 'Event', id: arg }] : ['Event'],
+    }),
+    getSolarSystems: builder.query<ApiSolarSystemsResponse, void>({
+      query: () => 'api/events/solarSystems',
     }),
 
     /* Pings */
@@ -139,6 +143,7 @@ export const {
   useAddEventMutation,
   useUpdateEventMutation,
   useDeleteEventMutation,
+  useGetSolarSystemsQuery,
 
   useGetPingsQuery,
   useAddPingMutation,
