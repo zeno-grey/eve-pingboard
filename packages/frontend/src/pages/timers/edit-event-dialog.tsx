@@ -7,6 +7,7 @@ import { RelativeTimeInput } from '../../components/relative-time-input'
 import { useAbsoluteRelativeTimeInput } from '../../hooks/use-absolute-relative-time-input'
 import { dayjs } from '../../utils/dayjs'
 import './edit-event-dialog.scss'
+import { SolarSystemInput } from './solar-system-input'
 
 type EditedEvent = Omit<ApiEventEntryInput, 'time'>
 
@@ -108,11 +109,10 @@ export function EditEventDialog({
 
             <Form.Group as={Col} controlId="solarSystem" xs={12} sm={6} className="mb-3">
               <Form.Label>Solar System</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="e.g. NBPH-N"
+              <SolarSystemInput
                 value={editedEvent.system}
-                onChange={e => setEventField('system', e.target.value)}
+                onChange={s => setEventField('system', s?.name ?? '')}
+                placeholder="e.g. NBPH-N"
               />
             </Form.Group>
 
