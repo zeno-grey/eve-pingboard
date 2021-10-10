@@ -1,7 +1,7 @@
 import Router from '@koa/router'
 import { BadRequest, NotFound } from 'http-errors'
 import * as yup from 'yup'
-import { ApiEventEntryInput, ApiEventsResponse } from '@ping-board/common'
+import { ApiEventEntryInput, ApiEventsResponse, ApiSolarSystemsResponse } from '@ping-board/common'
 import { userRoles, UserRoles } from '../../middleware/user-roles'
 import { EventsRepository } from '../../database'
 import { extractQueryParam, extractDateQueryParam } from '../../util/extract-query-param'
@@ -61,6 +61,12 @@ export function getRouter(options: {
       throw new NotFound()
     }
     ctx.status = 204
+  })
+
+  router.get('/solarSystems', userRoles.requireOneOf(UserRoles.EVENTS_WRITE), async ctx => {
+    const solarSystems = await options.events.getSolarSystems()
+    const response: ApiSolarSystemsResponse = { solarSystems }
+    ctx.body = response
   })
 
   return router

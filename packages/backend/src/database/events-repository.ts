@@ -1,4 +1,4 @@
-import { ApiEventEntry, ApiEventEntryInput } from '@ping-board/common'
+import { ApiEventEntry, ApiEventEntryInput, SolarSystem } from '@ping-board/common'
 import { Knex } from 'knex'
 import { Events, Systems } from './models'
 
@@ -6,6 +6,16 @@ export class EventsRepository {
   constructor(
     private readonly knex: Knex,
   ) {}
+
+  async getSolarSystems(): Promise<SolarSystem[]> {
+    const systems = await this.knex('systems')
+      .select('name', 'constellation', 'region')
+    return systems.map(s => ({
+      name: s.name,
+      constellation: s.constellation,
+      region: s.region,
+    }))
+  }
 
   async getEvents(options: {
     before?: Date | null
