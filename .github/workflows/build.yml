@@ -95,6 +95,7 @@ jobs:
             .pnp.cjs
             .yarn
             package.json
+            packages/backend/package.json
             packages/backend/build
             packages/common/package.json
             packages/common/build
