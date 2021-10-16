@@ -94,6 +94,8 @@ jobs:
           path: |
             .pnp.cjs
             .yarn
+            .yarnrc.yml
+            yarn.lock
             package.json
             packages/backend/package.json
             packages/backend/build
