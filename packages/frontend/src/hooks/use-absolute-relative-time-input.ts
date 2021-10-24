@@ -13,7 +13,7 @@ export interface UseAbsoluteRelativeTimeInputReturn {
   handleRelativeDateChange: (relative: Duration) => void
 }
 
-type AbsoluteOrRelativeTime =
+export type AbsoluteOrRelativeTime =
   | { absolute: Dayjs }
   | { relative: Duration }
 
@@ -25,6 +25,7 @@ export function useAbsoluteRelativeTimeInput({
   time: initialTime,
 }: UseAbsoluteRelativeTimeInputOptions): UseAbsoluteRelativeTimeInputReturn {
   const [time, setTime] = useState(initialTime)
+  useEffect(() => setTime(initialTime), [initialTime])
 
   const handleChangeInputMode = useCallback((mode: TimeInputMode) => {
     setTime(time => {

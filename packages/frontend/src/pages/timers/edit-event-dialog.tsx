@@ -1,10 +1,13 @@
 import { ApiEventEntry, ApiEventEntryInput } from '@ping-board/common'
 import clsx from 'clsx'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useMemo, useState } from 'react'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import { DateTimeInput } from '../../components/date-time-input'
 import { RelativeTimeInput } from '../../components/relative-time-input'
-import { useAbsoluteRelativeTimeInput } from '../../hooks/use-absolute-relative-time-input'
+import {
+  AbsoluteOrRelativeTime,
+  useAbsoluteRelativeTimeInput,
+} from '../../hooks/use-absolute-relative-time-input'
 import { dayjs } from '../../utils/dayjs'
 import './edit-event-dialog.scss'
 import { SolarSystemInput } from './solar-system-input'
@@ -49,16 +52,20 @@ export function EditEventDialog({
   onDelete,
 }: EditEventDialogProps): JSX.Element {
   const [editedEvent, setEditedEvent] = useState<EditedEvent>(getDefaultEditedEvent())
-  useEffect(() => setEditedEvent(event
-    ? { ...event }
-    : getDefaultEditedEvent()
-  ), [event])
+  const inputTime: AbsoluteOrRelativeTime = useMemo(() => event
+    ? { absolute: dayjs.utc(event.time) }
+    : { relative: dayjs.duration(0) }
+  , [event])
 
-  const timeInput = useAbsoluteRelativeTimeInput({
-    time: event
-      ? { absolute: dayjs.utc(event.time) }
-      : { relative: dayjs.duration(0) },
-  })
+  useEffect(() => {
+    console.log('replacing event', event, dayjs.utc(event?.time))
+    setEditedEvent(event
+      ? { ...event }
+      : getDefaultEditedEvent()
+    )
+  }, [event])
+
+  const timeInput = useAbsoluteRelativeTimeInput({ time: inputTime })
 
   const canSave = Object.entries(editedEvent ?? {}).every(([k, v]) => k === 'notes' || !!v)
   const save = () => {
