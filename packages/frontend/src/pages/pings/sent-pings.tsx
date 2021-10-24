@@ -1,8 +1,10 @@
-import { UserRoles } from '@ping-board/common'
+import { ApiPing, UserRoles } from '@ping-board/common'
+import { useState } from 'react'
 import { Alert, Button, Col, Row, Table } from 'react-bootstrap'
 import { Link, useRouteMatch } from 'react-router-dom'
 import { Time } from '../../components/time'
 import { useGetUserQuery } from '../../store'
+import { PingDetailDialog } from './ping-detail-dialog'
 import './pings.scss'
 import './sent-pings.scss'
 import { usePingsList } from './use-pings-list'
@@ -15,6 +17,8 @@ export function SentPings(): JSX.Element {
     me.data.character.roles.includes(UserRoles.PING_TEMPLATES_WRITE)
 
   const pings = usePingsList({ skip: me.isLoading || !canRead })
+
+  const [displayedPing, setDisplayedPing] = useState<ApiPing | null>(null)
 
   const { url } = useRouteMatch()
   const pingsUrl = url.split('/').slice(0, -1).join('/')
@@ -59,7 +63,7 @@ export function SentPings(): JSX.Element {
               </tr>
             }
             {pings.pings.map(p => (
-              <tr key={p.id}>
+              <tr key={p.id} onClick={() => setDisplayedPing(p)}>
                 <td>{p.author}</td>
                 <td><Time time={p.sentAt} format="YYYY-MM-DD HH:mm" /></td>
                 <td>{p.slackChannelName}</td>
@@ -87,5 +91,11 @@ export function SentPings(): JSX.Element {
         </Button>
       </Col>
     </Row>
+
+    <PingDetailDialog
+      ping={displayedPing}
+      onHide={() => setDisplayedPing(null)}
+      fullscreen="sm-down"
+    />
   </>)
 }
