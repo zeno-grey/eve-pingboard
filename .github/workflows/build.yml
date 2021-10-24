@@ -64,7 +64,8 @@ jobs:
   build-backend:
     runs-on: ubuntu-18.04
     needs: lint
-    if: startsWith(github.ref, 'refs/tags/') # Only run for Tags
+    # Only run for Tags and when making a PR to the main branch
+    if: startsWith(github.ref, 'refs/tags/') || github.base_ref == 'main'
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.4
@@ -88,6 +89,7 @@ jobs:
           yarn workspaces focus --production @ping-board/backend
 
       - name: Upload Release Artifact
+        if: startsWith(github.ref, 'refs/tags/') # Only run for Tags
         uses: actions/upload-artifact@v2.2.4
         with:
           name: backend
@@ -144,7 +146,8 @@ jobs:
   build-frontend:
     runs-on: ubuntu-18.04
     needs: lint
-    if: startsWith(github.ref, 'refs/tags/') # Only run for Tags
+    # Only run for Tags and when making a PR to the main branch
+    if: startsWith(github.ref, 'refs/tags/') || github.base_ref == 'main'
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.4
@@ -162,6 +165,7 @@ jobs:
         run: yarn workspace @ping-board/frontend build
 
       - name: Upload Release Artifact
+        if: startsWith(github.ref, 'refs/tags/') # Only run for Tags
         uses: actions/upload-artifact@v2.2.4
         with:
           name: frontend
