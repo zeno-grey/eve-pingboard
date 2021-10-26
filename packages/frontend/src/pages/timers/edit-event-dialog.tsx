@@ -58,7 +58,6 @@ export function EditEventDialog({
   , [event])
 
   useEffect(() => {
-    console.log('replacing event', event, dayjs.utc(event?.time))
     setEditedEvent(event
       ? { ...event }
       : getDefaultEditedEvent()
