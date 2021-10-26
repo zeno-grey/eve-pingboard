@@ -18,7 +18,16 @@ export function SentPings(): JSX.Element {
 
   const pings = usePingsList({ skip: me.isLoading || !canRead })
 
+  const [showPingDialog, setShowPingDialog] = useState(false)
   const [displayedPing, setDisplayedPing] = useState<ApiPing | null>(null)
+
+  const handlePingClicked = (ping: ApiPing) => {
+    setDisplayedPing(ping)
+    setShowPingDialog(true)
+  }
+  const handleClosePingDialog = () => {
+    setShowPingDialog(false)
+  }
 
   const { url } = useRouteMatch()
   const pingsUrl = url.split('/').slice(0, -1).join('/')
@@ -42,7 +51,7 @@ export function SentPings(): JSX.Element {
       </div>
       <Row>
         <Col xs={12}>
-          <Alert variant="info">
+          <Alert variant="info" className="py-2">
             These Pings were either sent by you, or were sent to channels you have view access to.
             View access is determined by your Neucore groups, not which Slack channels you are in.
           </Alert>
@@ -64,7 +73,7 @@ export function SentPings(): JSX.Element {
                 </tr>
               }
               {pings.pings.map(p => (
-                <tr key={p.id} onClick={() => setDisplayedPing(p)}>
+                <tr key={p.id} onClick={() => handlePingClicked(p)}>
                   <td>{p.author}</td>
                   <td><Time time={p.sentAt} format="YYYY-MM-DD HH:mm" /></td>
                   <td>{p.slackChannelName}</td>
@@ -94,8 +103,9 @@ export function SentPings(): JSX.Element {
       </Row>
 
       <PingDetailDialog
+        show={showPingDialog}
         ping={displayedPing}
-        onHide={() => setDisplayedPing(null)}
+        onHide={handleClosePingDialog}
         fullscreen="sm-down"
       />
     </Container>

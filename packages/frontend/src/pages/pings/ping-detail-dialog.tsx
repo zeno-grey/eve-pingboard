@@ -8,9 +8,9 @@ export interface PingDetailDialogProps {
 export function PingDetailDialog({
   ping,
   ...modalProps
-}: PingDetailDialogProps & Omit<ModalProps, 'show'>): JSX.Element {
+}: PingDetailDialogProps & ModalProps): JSX.Element {
   return (
-    <Modal show={!!ping} {...modalProps}>
+    <Modal {...modalProps}>
       <Modal.Header closeButton>
         <Modal.Title>
           <i className="bi-broadcast-pin" />{' '}
