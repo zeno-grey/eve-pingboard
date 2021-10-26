@@ -83,7 +83,8 @@ export function SendPings(): JSX.Element {
     selectedTemplate &&
     pingText !== selectedTemplate?.template &&
     pingText !== '' &&
-    pingText.indexOf(oldTextSeparator) === -1
+    pingText.indexOf(oldTextSeparator) === -1 &&
+    (!addPingToCalendar || !!calendarEntryTitle)
   )
 
   const sendPing = () => {
