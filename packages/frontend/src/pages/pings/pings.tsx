@@ -1,6 +1,6 @@
 import { UserRoles } from '@ping-board/common'
 import { Container } from 'react-bootstrap'
-import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
+import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useGetUserQuery } from '../../store'
 import { ManagePingTemplates } from './manage-ping-templates'
 import { SendPings } from './send-pings'
@@ -31,35 +31,21 @@ export function PingsPage(): JSX.Element {
   }
 
   return (
-    <Container>
-      <Switch>
-        <Route exact path={path}>
-          <div className="pings-header">
-            <h3>Send Pings</h3>
-            <Link to={`${url}/sent`} className="btn btn-primary" role="button">
-              Show Sent Pings
-            </Link>
-            <div style={{ flex: 1 }} />
-            {canEdit &&
-              <Link to={`${url}/templates`} className="btn btn-primary" role="button">
-                <i className="bi-wrench" /> Manage Ping Templates
-              </Link>
-            }
-          </div>
-          <SendPings />
+    <Switch>
+      <Route exact path={path}>
+        <SendPings />
+      </Route>
+      <Route path={`${path}/sent`}>
+        <SentPings />
+      </Route>
+      {canEdit && <>
+        <Route path={`${path}/templates`}>
+          <ManagePingTemplates />
         </Route>
-        <Route path={`${path}/sent`}>
-          <SentPings />
+        <Route path={`${path}/view-access`}>
+          <ManagePingViewAccess />
         </Route>
-        {canEdit && <>
-          <Route path={`${path}/templates`}>
-            <ManagePingTemplates />
-          </Route>
-          <Route path={`${path}/view-access`}>
-            <ManagePingViewAccess />
-          </Route>
-        </>}
-      </Switch>
-    </Container>
+      </>}
+    </Switch>
   )
 }

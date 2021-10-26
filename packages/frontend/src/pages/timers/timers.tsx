@@ -108,7 +108,7 @@ export function TimersPage(): JSX.Element {
       />
 
       <Button
-        style={{ width: '100%' }}
+        className="w-100 mb-3"
         disabled={!eventsList.hasMoreEvents || eventsList.loading || isSaving}
         onClick={eventsList.loadMoreEvents}
       >
