@@ -44,7 +44,7 @@ $red-900: shade-color($red, 80%);
 $body-bg: $gray-800;
 $success: $green-300;
 $body-color: #ffffff;
-$link-color: #3cbcf2;
+$link-color: shade-color($cyan, 10%);
 $link-decoration: none;
 $link-hover-decoration: underline;
 $link-shade-percentage: 10%;

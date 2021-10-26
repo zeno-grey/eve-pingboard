@@ -1,6 +1,6 @@
 import { ApiPingTemplate, UserRoles } from '@ping-board/common'
 import clsx from 'clsx'
-import { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import { ChangeEvent, MouseEvent, ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
   Button,
@@ -9,12 +9,15 @@ import {
   Form,
   ListGroup,
   Modal,
+  OverlayTrigger,
   Row,
   Spinner,
+  Tooltip,
 } from 'react-bootstrap'
 import { Link, Prompt, useRouteMatch } from 'react-router-dom'
 import { DateTimeInput } from '../../components/date-time-input'
 import { RelativeTimeInput } from '../../components/relative-time-input'
+import { Time } from '../../components/time'
 import { useAbsoluteRelativeTimeInput } from '../../hooks/use-absolute-relative-time-input'
 import { useGetPingTemplatesQuery, useAddPingMutation, useGetUserQuery } from '../../store'
 import { dayjs } from '../../utils/dayjs'
@@ -101,6 +104,53 @@ export function SendPings(): JSX.Element {
     }
   }
 
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+  const insertPlaceholderHandler = (placeholder: string) => (e: MouseEvent) => {
+    e.preventDefault()
+    if (!inputRef.current || !selectedTemplate) {
+      return
+    }
+    const { selectionStart, selectionEnd } = inputRef.current
+    const newText = [
+      pingText.substring(0, selectionStart),
+      `{{${placeholder}}}`,
+      pingText.substring(selectionEnd),
+    ].join('')
+    setPingText(newText)
+    setTimeout(() => {
+      // + 4 because of the {{}}
+      const newSelection = selectionStart + placeholder.length + 4
+      inputRef.current?.setSelectionRange(newSelection, newSelection)
+    })
+  }
+
+  const name = me.data?.isLoggedIn && me.data.character.name
+  const availablePlaceholders: { placeholder: string, description: ReactNode }[] = [
+    ...selectedTemplate ? [
+      {
+        placeholder: 'me',
+        description: `the name of the character you are logged in with (${name})`,
+      },
+    ] : [],
+    ...selectedTemplate?.allowScheduling && addPingToCalendar ? [
+      {
+        placeholder: 'title',
+        description: `the title of the calendar entry${
+          calendarEntryTitle && ` (${calendarEntryTitle})`
+        }`,
+      },
+      {
+        placeholder: 'time',
+        description: (<>
+          a <a href="https://time.nakamura-labs.com/" target="_blank" rel="noreferrer">
+            Nakamura time link
+          </a> for the calendar entry&apos;s time and date
+          (<Time time={timeInput.absoluteTime} asLink format={'YYYY-MM-DD HH:mm'} />)
+        </>),
+      },
+    ] : [],
+  ]
+
   const { url } = useRouteMatch()
 
   return (
@@ -121,7 +171,7 @@ export function SendPings(): JSX.Element {
           </Link>
         }
       </div>
-      <Alert variant="warning">
+      <Alert variant="warning" className="py-2">
         <i className="bi-exclamation-triangle" />{' '}
         If you send <b>bad pings</b> you <b>will be banned from sending pings</b>. Use the
         template, if possible. Also, <b>don&apos;t spam newlines and emoji in your pings or
@@ -215,15 +265,35 @@ export function SendPings(): JSX.Element {
                   />
                 </Form.Group>
               </Row>
-
             </>)}
-
-            {/* <div className="pe-0"><hr className="mt-0" /></div> */}
           </>)}
 
           <Form.Group as={Col} xs={12} className="mb-3 pe-0 ping">
+            {availablePlaceholders.length > 0 && (
+              <Alert variant="info" className="py-1">
+                <i className="bi-info-circle" />{' '}
+                There are a few placeholders available that will be replaced when sending the ping:
+                <ul className="mb-0">
+                  {availablePlaceholders.map(({ placeholder, description }) => (
+                    <li key={placeholder}>
+                      <OverlayTrigger
+                        placement="bottom"
+                        delay={{ show: 250, hide: 0 }}
+                        overlay={
+                          <Tooltip>Click to insert the placeholder at the cursor position</Tooltip>
+                        }
+                      >
+                        <code onMouseDown={insertPlaceholderHandler(placeholder)} role="button">
+                          {`{{${placeholder}}}`}
+                        </code>
+                      </OverlayTrigger> → {description}
+                    </li>
+                  ))}
+                </ul>
+              </Alert>
+            )}
             <Form.Label>Ping Text:</Form.Label>
-            <Form.Control
+            <Form.Control ref={inputRef}
               as="textarea"
               className="ping-text"
               disabled={!selectedTemplate}
