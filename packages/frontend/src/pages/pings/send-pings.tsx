@@ -292,7 +292,6 @@ export function SendPings(): JSX.Element {
                 </ul>
               </Alert>
             )}
-
             <Form.Label>Ping Text:</Form.Label>
             <Form.Control ref={inputRef}
               as="textarea"
