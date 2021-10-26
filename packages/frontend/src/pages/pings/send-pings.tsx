@@ -30,9 +30,8 @@ export function SendPings(): JSX.Element {
   const [postPing, postPingState] = useAddPingMutation()
 
   const [addPingToCalendar, setAddPingToCalendar] = useState(false)
-  const timeInput = useAbsoluteRelativeTimeInput({
-    time: { relative: dayjs.duration(0) },
-  })
+  const time = useMemo(() => ({ time: { relative: dayjs.duration(0) } }), [])
+  const timeInput = useAbsoluteRelativeTimeInput(time)
   const [calendarEntryTitle, setCalendarEntryTitle] = useState('')
 
   const [selectedTemplate, setSelectedTemplate] = useState<ApiPingTemplate | null>(null)
