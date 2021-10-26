@@ -1,10 +1,61 @@
 @import '../../theme.scss';
 
 .send-pings {
-  .time-mode-input {
-    transition: $transition-fade;
+  overflow-y: auto;
+  @include media-breakpoint-up(md) {
+    overflow: hidden;
   }
-  .inactive-time-mode {
-    opacity: 0.7;
+
+  .pings-container {
+    flex: 1;
+    @include media-breakpoint-up(md) {
+      overflow: hidden;
+    }
+
+    .time-mode-input {
+      transition: $transition-fade;
+    }
+    .inactive-time-mode {
+      opacity: 0.7;
+    }
+
+    .template-column {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+
+      @include media-breakpoint-up(md) {
+        max-height: 100%;
+      }
+
+      .templates {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+      }
+    }
+
+    .ping-column {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+
+      @include media-breakpoint-up(md) {
+        max-height: 100%;
+        overflow: auto;
+      }
+
+      .ping {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+
+        .ping-text {
+          flex: 1;
+          overflow: auto;
+          min-height: 200px;
+        }
+      }
+    }
   }
 }
