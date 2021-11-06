@@ -1,6 +1,6 @@
 import { ApiEventEntry, ApiEventEntryInput } from '@ping-board/common'
 import clsx from 'clsx'
-import { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import { DateTimeInput } from '../../components/date-time-input'
 import { RelativeTimeInput } from '../../components/relative-time-input'
@@ -52,17 +52,22 @@ export function EditEventDialog({
   onDelete,
 }: EditEventDialogProps): JSX.Element {
   const [editedEvent, setEditedEvent] = useState<EditedEvent>(getDefaultEditedEvent())
-  const inputTime: AbsoluteOrRelativeTime = useMemo(() => event
-    ? { absolute: dayjs.utc(event.time) }
-    : { relative: dayjs.duration(0) }
-  , [event])
+  const [inputTime, setInputTime] = useState<AbsoluteOrRelativeTime>({
+    relative: dayjs.duration(0),
+  })
 
   useEffect(() => {
-    setEditedEvent(event
-      ? { ...event }
-      : getDefaultEditedEvent()
-    )
-  }, [event])
+    if (!show) {
+      return
+    }
+    if (event) {
+      setEditedEvent({ ...event })
+      setInputTime({ absolute: dayjs.utc(event.time) })
+    } else {
+      setEditedEvent(getDefaultEditedEvent())
+      setInputTime({ relative: dayjs.duration(0) })
+    }
+  }, [event, show])
 
   const timeInput = useAbsoluteRelativeTimeInput({ time: inputTime })
 
