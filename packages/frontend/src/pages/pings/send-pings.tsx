@@ -203,7 +203,7 @@ export function SendPings(): JSX.Element {
               <Form.Check
                 checked={addPingToCalendar}
                 onChange={() => setAddPingToCalendar(add => !add)}
-                label="Add this Ping to the Calendar"
+                label="Add this Ping to the Calendar (select for more options)"
               />
             </Form.Group>
 
