@@ -87,27 +87,37 @@ export function getRouter(options: {
     )
 
     try {
-      const storedPing = await options.pings.addPing({
-        text: formattedText,
-        scheduledTitle: ping.scheduledTitle,
-        scheduledFor: ping.scheduledFor,
-        characterName: ctx.session.character.name,
-        template,
-        runInTransaction: async p => {
-          const wrappedText = [
-            '<!channel> PING',
-            '\n\n',
-            p.text,
-            '\n\n',
-            `> ${dayjs(p.sentAt).format('YYYY-MM-DD HH:mm:ss')} `,
-            `- *${p.author}* to #${p.slackChannelName}`,
-          ].join('')
-          await options.slackClient.postMessage(template.slackChannelId, wrappedText)
-        },
-      })
-      console.log('setting status')
-      ctx.status = 201
-      ctx.body = storedPing
+      const characterName = ctx.session.character.name
+      const pingDate = new Date()
+      const wrappedText = [
+        '<!channel> PING',
+        '\n\n',
+        formattedText,
+        '\n\n',
+        `> ${dayjs(pingDate).format('YYYY-MM-DD HH:mm:ss')} `,
+        `- *${characterName}* to #${template.slackChannelId}`,
+      ].join('')
+      const slackMessageId = await options.slackClient.postMessage(
+        template.slackChannelId,
+        wrappedText
+      )
+      try {
+        const p = await options.pings.addPing({
+          text: wrappedText,
+          characterName,
+          template,
+          scheduledTitle: ping.scheduledTitle,
+          scheduledFor: ping.scheduledFor,
+          slackMessageId,
+        })
+        ctx.status = 201
+        ctx.body = p
+      } catch (error) {
+        // Storing the ping in the database failed, let's delete the corresponding slack message
+        // and pretend we never event sent a ping in the first place.
+        await options.slackClient.deleteMessage(template.slackChannelId, slackMessageId)
+        throw error
+      }
     } catch (error) {
       if (error instanceof SlackRequestFailedError) {
         throw new InternalServerError(error.message)

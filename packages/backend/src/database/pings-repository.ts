@@ -130,8 +130,8 @@ export class PingsRepository {
     scheduledTitle?: string,
     scheduledFor?: string,
     template: ApiPingTemplate,
+    slackMessageId: string,
     characterName: string,
-    runInTransaction?: (ping: ApiPing) => void | Promise<void>
   }): Promise<ApiPing> {
     return await this.knex.transaction(async trx => {
       const pingId = (await trx('pings').insert({
@@ -141,6 +141,15 @@ export class PingsRepository {
         slack_channel_name: options.template.slackChannelName,
         text: options.text,
       }))[0]
+      if (options.template.allowScheduling && options.scheduledFor && options.scheduledTitle) {
+        const date = new Date(options.scheduledFor)
+        await trx('scheduled_pings').insert({
+          ping_id: pingId,
+          title: options.scheduledTitle,
+          scheduled_for: date,
+        })
+      }
+
       const storedPing = (await trx('pings')
         .select<(Pings & Partial<Pick<ScheduledPings, 'scheduled_for' | 'title'>>)[]>(
           'pings.*', 'scheduled_pings.scheduled_for', 'scheduled_pings.title'
@@ -153,19 +162,7 @@ export class PingsRepository {
         throw new PingCreationFailedError()
       }
 
-      if (options.template.allowScheduling && options.scheduledFor && options.scheduledTitle) {
-        const date = new Date(options.scheduledFor)
-        await trx('scheduled_pings').insert({
-          ping_id: pingId,
-          title: options.scheduledTitle,
-          scheduled_for: date,
-        })
-      }
-
       const apiPing = rawToPing(storedPing)
-      if (options.runInTransaction) {
-        await options.runInTransaction(apiPing)
-      }
       return apiPing
     })
   }

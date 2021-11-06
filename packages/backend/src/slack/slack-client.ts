@@ -71,10 +71,21 @@ export class SlackClient {
     return await this.channelNameCache.get(channelId)
   }
 
-  async postMessage(channelId: string, text: string): Promise<void> {
+  async postMessage(channelId: string, text: string): Promise<string> {
     const response = await this.client.chat.postMessage({
       channel: channelId,
       text,
+    })
+    if (!response.ok || !response.message?.ts) {
+      throw new SlackRequestFailedError(response.error)
+    }
+    return response.message.ts
+  }
+
+  async deleteMessage(channelId: string, messageId: string): Promise<void> {
+    const response = await this.client.chat.delete({
+      channel: channelId,
+      ts: messageId,
     })
     if (!response.ok) {
       throw new SlackRequestFailedError(response.error)
