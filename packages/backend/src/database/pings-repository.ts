@@ -74,7 +74,7 @@ export class PingsRepository {
       return {
         pings: pings.map(rawToPing),
         remaining: count.length > 0 && typeof count[0].count === 'number'
-          ? pings.length - count[0].count
+          ? count[0].count - pings.length
           : 0,
       }
     })
