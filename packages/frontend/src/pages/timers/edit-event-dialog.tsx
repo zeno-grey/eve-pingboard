@@ -123,7 +123,7 @@ export function EditEventDialog({
               <SolarSystemInput
                 value={editedEvent.system}
                 onChange={s => setEventField('system', s?.name ?? '')}
-                placeholder="e.g. NBPH-N"
+                placeholder="e.g. Q-5211"
               />
             </Form.Group>
 
