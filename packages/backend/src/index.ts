@@ -25,16 +25,20 @@ async function main() {
   const sessionProvider = new InMemorySessionProvider()
   sessionProvider.startAutoCleanup()
 
-
   const cookieSigningKeys = process.env.COOKIE_KEY?.split(' ')
 
   const knex = await knexInstance()
   const events = new EventsRepository(knex)
   const pings = new PingsRepository(knex)
 
+  if (process.env.GROUPS_WRITE_EVENTS) {
+    console.warn('Using GROUPS_WRITE_EVENTS is deprecated, use GROUPS_EDIT_EVENTS instead')
+  }
+
   const groupsByRole: [UserRoles, string | undefined][] = [
     [UserRoles.EVENTS_READ, process.env.GROUPS_READ_EVENTS],
-    [UserRoles.EVENTS_WRITE, process.env.GROUPS_WRITE_EVENTS],
+    [UserRoles.EVENTS_ADD, process.env.GROUPS_ADD_EVENTS],
+    [UserRoles.EVENTS_EDIT, process.env.GROUPS_EDIT_EVENTS || process.env.GROUPS_WRITE_EVENTS],
     [UserRoles.PING, process.env.GROUPS_PING],
     [UserRoles.PING_TEMPLATES_WRITE, process.env.GROUPS_WRITE_PING_TEMPLATES],
   ]

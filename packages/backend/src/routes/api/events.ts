@@ -30,14 +30,18 @@ export function getRouter(options: {
     ctx.body = response
   })
 
-  router.post('/', userRoles.requireOneOf(UserRoles.EVENTS_WRITE), async ctx => {
-    const event = await validateEventInput(ctx.request.body)
-    const response = await options.events.addEvent(event, ctx.session?.character?.name ?? '')
-    ctx.body = response
-    ctx.status = 201
-  })
+  router.post(
+    '/',
+    userRoles.requireOneOf(UserRoles.EVENTS_EDIT, UserRoles.EVENTS_ADD),
+    async ctx => {
+      const event = await validateEventInput(ctx.request.body)
+      const response = await options.events.addEvent(event, ctx.session?.character?.name ?? '')
+      ctx.body = response
+      ctx.status = 201
+    }
+  )
 
-  router.put('/:eventId', userRoles.requireOneOf(UserRoles.EVENTS_WRITE), async ctx => {
+  router.put('/:eventId', userRoles.requireOneOf(UserRoles.EVENTS_EDIT), async ctx => {
     const eventId = parseInt(ctx.params['eventId'])
     if (!Number.isFinite(eventId) || eventId < 0) {
       throw new BadRequest()
@@ -51,7 +55,7 @@ export function getRouter(options: {
     ctx.body = response
   })
 
-  router.delete('/:eventId', userRoles.requireOneOf(UserRoles.EVENTS_WRITE), async ctx => {
+  router.delete('/:eventId', userRoles.requireOneOf(UserRoles.EVENTS_EDIT), async ctx => {
     const eventId = parseInt(ctx.params['eventId'])
     if (!Number.isFinite(eventId) || eventId < 0) {
       throw new BadRequest()
@@ -63,11 +67,15 @@ export function getRouter(options: {
     ctx.status = 204
   })
 
-  router.get('/solarSystems', userRoles.requireOneOf(UserRoles.EVENTS_WRITE), async ctx => {
-    const solarSystems = await options.events.getSolarSystems()
-    const response: ApiSolarSystemsResponse = { solarSystems }
-    ctx.body = response
-  })
+  router.get(
+    '/solarSystems',
+    userRoles.requireOneOf(UserRoles.EVENTS_EDIT, UserRoles.EVENTS_ADD),
+    async ctx => {
+      const solarSystems = await options.events.getSolarSystems()
+      const response: ApiSolarSystemsResponse = { solarSystems }
+      ctx.body = response
+    }
+  )
 
   return router
 }

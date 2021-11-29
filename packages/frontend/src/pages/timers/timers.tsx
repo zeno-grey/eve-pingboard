@@ -16,7 +16,10 @@ import { useEventsList } from './use-events-list'
 export function TimersPage(): JSX.Element {
   const me = useGetUserQuery()
 
-  const canEdit = me.data?.isLoggedIn && me.data.character.roles.includes(UserRoles.EVENTS_WRITE)
+  const canEdit = me.data?.isLoggedIn && me.data.character.roles.includes(UserRoles.EVENTS_EDIT)
+  const canAdd = canEdit || (
+    me.data?.isLoggedIn && me.data.character.roles.includes(UserRoles.EVENTS_ADD)
+  )
   const canRead = me.data?.isLoggedIn && me.data.character.roles.includes(UserRoles.EVENTS_READ)
 
   const eventsList = useEventsList({ skip: me.isLoading || !canRead })
@@ -93,7 +96,7 @@ export function TimersPage(): JSX.Element {
           <i className="bi-arrow-clockwise" /> Reload
         </Button>
         <div style={{ flex: 1 }} />
-        {canEdit &&
+        {canAdd &&
           <Button onClick={addNewEvent} disabled={isSaving}>
             <i className="bi-calendar-plus" /> New Event
           </Button>
