@@ -80,7 +80,7 @@ export function getRouter(options: {
     ]
     const formattedText = placeholders.reduce(
       (text, { placeholder, value }) => text.replace(
-        new RegExp(`{{${placeholder}}}`),
+        new RegExp(`{{${placeholder}}}`, 'igm'),
         () => typeof value === 'function' ? value() : value
       ),
       ping.text
