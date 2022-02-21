@@ -73,6 +73,7 @@ export class SlackClient {
 
   async postMessage(channelId: string, text: string): Promise<string> {
     const response = await this.client.chat.postMessage({
+      link_names: true,
       channel: channelId,
       text,
     })
