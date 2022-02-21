@@ -100,6 +100,7 @@ export function SendPing(): JSX.Element {
         input.scheduledFor = toAbsoluteTime(pingTime).toISOString()
         input.scheduledTitle = editedPing.calendarEntryTitle
       }
+      setShowSendingDialog(true)
       postPing(input).then(() => {
         setLastSentPing({ text: input.text, templateId: template.id })
         setEditedPing(p => ({ ...p, text: '' }))
