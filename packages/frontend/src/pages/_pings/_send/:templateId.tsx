@@ -102,6 +102,7 @@ export function SendPing(): JSX.Element {
       }
       postPing(input).then(() => {
         setLastSentPing({ text: input.text, templateId: template.id })
+        setEditedPing(p => ({ ...p, text: '' }))
       })
     }
   }
