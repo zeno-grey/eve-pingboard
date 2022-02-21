@@ -1,5 +1,5 @@
-import { ApiEventEntry, ApiEventsResponse } from '@ping-board/common'
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { ApiEventEntry, ApiEventsResponse } from '@ping-board/common'
 import { RootState } from '.'
 import { apiSlice } from './api'
 

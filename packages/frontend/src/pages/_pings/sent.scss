@@ -1,0 +1,53 @@
+@import '../../theme.scss';
+
+.sent-pings-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 0.75rem ($grid-gutter-width * -0.5) 0.25rem;
+
+  & > * {
+    margin: 0 ($grid-gutter-width * 0.5);
+  }
+  & > .btn {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.sent-pings-table {
+  max-width: 100%;
+  overflow: hidden;
+  & td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+  }
+
+  & .text-cell {
+    width: 100%;
+    & > div {
+      white-space: normal;
+      max-height: 1.5rem;
+      overflow: hidden;
+      position: relative;
+      color: transparent;
+      user-select: text;
+
+      &::after {
+        pointer-events: none;
+        content: attr(title);
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        color: white;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        user-select: none;
+      }
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { dayjs, Dayjs, Duration } from '../utils/dayjs'
 
 export type TimeInputMode = 'absolute' | 'relative'
@@ -18,28 +18,31 @@ export type AbsoluteOrRelativeTime =
   | { relative: Duration }
 
 export interface UseAbsoluteRelativeTimeInputOptions {
+  allowPast?: boolean
   time: AbsoluteOrRelativeTime
+  onChange: (newValue: AbsoluteOrRelativeTime) => void
 }
 
 export function useAbsoluteRelativeTimeInput({
-  time: initialTime,
+  allowPast = true,
+  time,
+  onChange,
 }: UseAbsoluteRelativeTimeInputOptions): UseAbsoluteRelativeTimeInputReturn {
-  const [time, setTime] = useState(initialTime)
-  useEffect(() => setTime(initialTime), [initialTime])
+  const handleChangeInputMode = (mode: TimeInputMode) => {
+    if (mode === 'absolute' && 'relative' in time) {
+      onChange({ absolute: dayjs().add(time.relative).utc() })
+    } else if (mode === 'relative' && 'absolute' in time) {
+      onChange({ relative: dayjs.duration(time.absolute.diff(dayjs())) })
+    }
+  }
+  const handleAbsoluteDateChange = (absolute: Dayjs) => onChange({
+    absolute: !allowPast && absolute.isBefore(dayjs()) ? dayjs() : absolute,
+  })
+  const handleRelativeDateChange = (relative: Duration) => onChange({
+    relative: !allowPast && relative.asMilliseconds() < 0 ? dayjs.duration(0) : relative,
+  })
 
-  const handleChangeInputMode = useCallback((mode: TimeInputMode) => {
-    setTime(time => {
-      if (mode === 'absolute' && 'relative' in time) {
-        return { absolute: dayjs().add(time.relative).utc() }
-      } else if (mode === 'relative' && 'absolute' in time) {
-        return { relative: dayjs.duration(time.absolute.diff(dayjs())) }
-      }
-      return time
-    })
-  }, [])
-
-  const handleAbsoluteDateChange = useCallback((absolute: Dayjs) => setTime({ absolute }), [])
-  const handleRelativeDateChange = useCallback((relative: Duration) => setTime({ relative }), [])
+  const inputMode: TimeInputMode = 'absolute' in time ? 'absolute' : 'relative'
 
   const [times, setTimes] = useState(calculateTimes(time))
   useEffect(() => {
@@ -50,12 +53,19 @@ export function useAbsoluteRelativeTimeInput({
   }, [time])
 
   return {
-    ...times,
     handleChangeInputMode,
-    inputMode: 'absolute' in time ? 'absolute' : 'relative',
     handleAbsoluteDateChange,
     handleRelativeDateChange,
+    inputMode,
+    ...times,
   }
+}
+
+export function toAbsoluteTime(time: AbsoluteOrRelativeTime): Dayjs {
+  return 'absolute' in time ? time.absolute : dayjs().add(time.relative).utc()
+}
+export function toRelativeTime(time: AbsoluteOrRelativeTime): Duration {
+  return 'relative' in time ? time.relative : dayjs.duration(time.absolute.diff(dayjs()))
 }
 
 function calculateTimes(time: AbsoluteOrRelativeTime): {
@@ -63,7 +73,7 @@ function calculateTimes(time: AbsoluteOrRelativeTime): {
   relativeTime: Duration
 } {
   return {
-    absoluteTime: 'absolute' in time ? time.absolute : dayjs().add(time.relative).utc(),
-    relativeTime: 'relative' in time ? time.relative : dayjs.duration(time.absolute.diff(dayjs())),
+    absoluteTime: toAbsoluteTime(time),
+    relativeTime: toRelativeTime(time),
   }
 }

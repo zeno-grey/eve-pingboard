@@ -1,0 +1,56 @@
+@import '../../theme.scss';
+
+.send-pings {
+  overflow-y: auto;
+  @include media-breakpoint-up(md) {
+    overflow: hidden;
+  }
+
+  .pings-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 0.75rem ($grid-gutter-width * -0.5) 0.25rem;
+  
+    & > * {
+      margin: 0 ($grid-gutter-width * 0.5);
+    }
+    & > .btn {
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .pings-container {
+    flex: 1;
+    @include media-breakpoint-up(md) {
+      overflow: hidden;
+    }
+
+    .template-column {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+
+      @include media-breakpoint-up(md) {
+        max-height: 100%;
+      }
+
+      .templates {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+      }
+    }
+
+    .ping-column {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+
+      @include media-breakpoint-up(md) {
+        max-height: 100%;
+        overflow: auto;
+      }
+    }
+  }
+}

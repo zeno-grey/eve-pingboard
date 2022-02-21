@@ -1,5 +1,4 @@
-import { useEffect } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Col, Form, Row, RowProps } from 'react-bootstrap'
 import { dayjs, Duration, DurationUnitsObjectType } from '../utils/dayjs'
 
@@ -15,22 +14,30 @@ const defaultDurationComponents: DurationComponent[] = [
 ]
 
 export interface RelativeTimeInputProps extends Omit<RowProps, 'onChange'> {
+  allowNegative?: boolean
   value: Duration
   onChange: (value: Duration) => void
   durationComponents?: DurationComponent[]
 }
 export function RelativeTimeInput({
+  allowNegative = true,
   value: duration,
   onChange,
   durationComponents = defaultDurationComponents,
   ...rowProps
 }: RelativeTimeInputProps): JSX.Element {
-  const durationFromTexts = (texts: string[]) => dayjs.duration(Object.fromEntries(
-    durationComponents.map(({ unit }, i) => {
-      const value = parseInt(texts[i], 10)
-      return [unit, isFinite(value) ? value : 0]
-    })
-  ))
+  const durationFromTexts = (texts: string[]) => {
+    const ms = dayjs.duration(Object.fromEntries(
+      durationComponents.map(({ unit }, i) => {
+        const value = parseInt(texts[i], 10)
+        return [unit, isFinite(value) ? value : 0]
+      })
+    )).asMilliseconds()
+    if (!allowNegative && ms < 0) {
+      return dayjs.duration(0)
+    }
+    return dayjs.duration(ms, 'ms')
+  }
   const textsFromDuration = (duration: Duration) => durationComponents
     .map(({ format }) => typeof format === 'function'
       ? `${format(duration)}`

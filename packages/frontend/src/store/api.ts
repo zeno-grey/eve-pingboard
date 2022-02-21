@@ -1,3 +1,4 @@
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/dist/query/react'
 import {
   ApiEventEntry,
   ApiEventEntryInput,
@@ -15,7 +16,6 @@ import {
   ApiSlackChannelsResponse,
   ApiSolarSystemsResponse,
 } from '@ping-board/common'
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/dist/query/react'
 
 export const apiSlice = createApi({
   reducerPath: 'loginApi',

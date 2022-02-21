@@ -1,5 +1,5 @@
 import { Button, Container, Nav, Navbar } from 'react-bootstrap'
-import { useHistory } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { useGetUserQuery, useLogOutMutation } from '../store'
 
 export interface NavPage {
@@ -12,12 +12,6 @@ export interface AppNavProps {
 }
 
 export function AppNav(props: AppNavProps): JSX.Element {
-  const history = useHistory()
-  const navigateTo = (href: string) => (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-    e.preventDefault()
-    history.push(href)
-  }
-
   const user = useGetUserQuery(void 0, {
     pollingInterval: 60 * 1000,
   })
@@ -33,7 +27,11 @@ export function AppNav(props: AppNavProps): JSX.Element {
           <Navbar.Collapse id="navbar-nav" className="justify-content-end">
             <Nav variant="pills" className="me-auto">
               {props.pages.map(page => (
-                <Nav.Link onClick={navigateTo(page.href)} key={page.title} href={page.href}>
+                <Nav.Link
+                  as={NavLink}
+                  key={page.title}
+                  to={page.href}
+                >
                   {page.title}
                 </Nav.Link>
               ))}
@@ -45,7 +43,7 @@ export function AppNav(props: AppNavProps): JSX.Element {
                     <Navbar.Text>{user.data.character.name}</Navbar.Text>
                     <Button onClick={() => logout()}>Log Out</Button>
                   </>
-                : <Button onClick={navigateTo('/login')} href="/login">Log In</Button>
+                : <Link className="btn btn-primary" type="button" to="/login">Log In</Link>
             }
           </Navbar.Collapse>
       </Container>

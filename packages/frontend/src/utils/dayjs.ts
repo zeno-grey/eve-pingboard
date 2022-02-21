@@ -205,5 +205,5 @@ async function loadLocale() {
 loadLocale().then()
 
 export { dayjs }
-export type { Dayjs } from 'dayjs'
+export { Dayjs } from 'dayjs'
 export type { Duration, DurationUnitsObjectType } from 'dayjs/plugin/duration'

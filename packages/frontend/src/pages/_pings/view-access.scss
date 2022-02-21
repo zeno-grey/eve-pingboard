@@ -1,0 +1,15 @@
+@import '../../theme.scss';
+
+.view-access-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 0.75rem ($grid-gutter-width * -0.5) 0.25rem;
+
+  & > * {
+    margin: 0 ($grid-gutter-width * 0.5);
+  }
+  & > .btn {
+    margin-bottom: 0.5rem;
+  }
+}

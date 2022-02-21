@@ -1,5 +1,5 @@
-import { ApiPing } from '@ping-board/common'
 import { Col, Row } from 'react-bootstrap'
+import { ApiPing } from '@ping-board/common'
 import { dayjs } from '../utils/dayjs'
 import { RelativeTime } from './relative-time'
 import { SlackMessage } from './slack-message'

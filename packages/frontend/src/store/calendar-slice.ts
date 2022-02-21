@@ -1,3 +1,4 @@
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import {
   ApiEventEntry,
   ApiEventsResponse,
@@ -5,9 +6,8 @@ import {
   ApiScheduledPingsResponse,
   isScheduledPing,
 } from '@ping-board/common'
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { RootState } from '.'
-import { eventColors } from '../pages/calendar/calendar'
+import { eventColors } from '../components/calendar'
 import { Dayjs, dayjs } from '../utils/dayjs'
 import { apiSlice } from './api'
 

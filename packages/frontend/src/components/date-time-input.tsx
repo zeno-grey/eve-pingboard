@@ -4,10 +4,12 @@ import { Col, Form, Row, RowProps } from 'react-bootstrap'
 import { Dayjs, dayjs } from '../utils/dayjs'
 
 export interface DateTimeInputProps extends Omit<RowProps, 'onChange'> {
+  allowPast?: boolean
   value: Date | string | Dayjs
   onChange: (date: Dayjs) => void
 }
 export function DateTimeInput({
+  allowPast = true,
   value: date,
   onChange,
   ...rowProps
@@ -62,7 +64,8 @@ export function DateTimeInput({
       return
     }
     const dateTime = parseDateTime(dateInputText, value)
-    if (dateTime.isValid()) {
+    console.log({ dateTime, allowPast, isBeforeNow: dateTime.isBefore(dayjs()) })
+    if (dateTime.isValid() && (allowPast || !dateTime.isBefore(dayjs()))) {
       onChange(dateTime)
     }
   }
@@ -72,6 +75,10 @@ export function DateTimeInput({
     let dateTime = parseDateTime(dateInputText, timeInputText)
     if (!dateTime.isValid()) {
       dateTime = dayjs(date)
+    }
+    if (!allowPast && dateTime.isBefore(dayjs())) {
+      dateTime = dayjs()
+      onChange(dateTime)
     }
     setDateInputText(dateTime.format(dateFormat))
     setTimeInputText(dateTime.format(timeFormat))
@@ -85,6 +92,7 @@ export function DateTimeInput({
           type="date"
           value={dateInputText}
           pattern="^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          min={allowPast ? undefined : dayjs().toISOString().split('T', 1)[0]}
           onChange={handleDateInputChange}
           onBlur={handleBlur}
         />
