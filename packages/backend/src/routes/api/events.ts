@@ -32,7 +32,7 @@ export function getRouter(options: {
 
   router.post(
     '/',
-    userRoles.requireOneOf(UserRoles.EVENTS_EDIT, UserRoles.EVENTS_ADD),
+    userRoles.requireOneFreshOf(UserRoles.EVENTS_EDIT, UserRoles.EVENTS_ADD),
     async ctx => {
       const event = await validateEventInput(ctx.request.body)
       const response = await options.events.addEvent(event, ctx.session?.character?.name ?? '')
@@ -41,7 +41,7 @@ export function getRouter(options: {
     }
   )
 
-  router.put('/:eventId', userRoles.requireOneOf(UserRoles.EVENTS_EDIT), async ctx => {
+  router.put('/:eventId', userRoles.requireOneFreshOf(UserRoles.EVENTS_EDIT), async ctx => {
     const eventId = parseInt(ctx.params['eventId'])
     if (!Number.isFinite(eventId) || eventId < 0) {
       throw new BadRequest()
@@ -55,7 +55,7 @@ export function getRouter(options: {
     ctx.body = response
   })
 
-  router.delete('/:eventId', userRoles.requireOneOf(UserRoles.EVENTS_EDIT), async ctx => {
+  router.delete('/:eventId', userRoles.requireOneFreshOf(UserRoles.EVENTS_EDIT), async ctx => {
     const eventId = parseInt(ctx.params['eventId'])
     if (!Number.isFinite(eventId) || eventId < 0) {
       throw new BadRequest()

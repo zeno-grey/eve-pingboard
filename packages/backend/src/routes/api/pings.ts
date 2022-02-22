@@ -37,14 +37,14 @@ export function getRouter(options: {
     const before = typeof beforeParam === 'string' ? new Date(beforeParam) : undefined
     const pings = await options.pings.getPings({
       characterName: ctx.session.character.name,
-      neucoreGroups: ctx.session.character.neucoreGroups.map(g => g.name),
+      neucoreGroups: await ctx.getNeucoreGroups(),
       before,
     })
     const response: ApiPingsResponse = { ...pings }
     ctx.body = response
   })
 
-  router.post('/', userRoles.requireOneOf(UserRoles.PING), async ctx => {
+  router.post('/', userRoles.requireOneFreshOf(UserRoles.PING), async ctx => {
     if (!ctx.session?.character) {
       throw new Unauthorized()
     }
@@ -56,10 +56,10 @@ export function getRouter(options: {
     if (!!ping.scheduledFor !== !!ping.scheduledTitle) {
       throw new BadRequest('either specify both a calendar time and title or neither of both')
     }
+    const groups = await ctx.getNeucoreGroups()
     if (
       template.allowedNeucoreGroups.length > 0 &&
-      !template.allowedNeucoreGroups.some(g =>
-        ctx.session?.character?.neucoreGroups.some(({ name }) => g === name))
+      !template.allowedNeucoreGroups.some(g => groups.includes(g))
     ) {
       throw new Forbidden('you are not permitted to ping using this template')
     }
@@ -140,7 +140,7 @@ export function getRouter(options: {
 
     const response: ApiScheduledPingsResponse = await options.pings.getScheduledEvents({
       characterName: ctx.session.character.name,
-      neucoreGroups: ctx.session.character.neucoreGroups.map(g => g.name),
+      neucoreGroups: await ctx.getNeucoreGroups(),
       before,
       after,
       count,
@@ -159,7 +159,8 @@ export function getRouter(options: {
     ctx.body = response
   })
 
-  router.get('/neucore-groups',
+  router.get(
+    '/neucore-groups',
     userRoles.requireOneOf(UserRoles.PING_TEMPLATES_WRITE),
     async ctx => {
       const appInfo = await options.neucoreClient.getAppInfo()
@@ -172,12 +173,12 @@ export function getRouter(options: {
 
   router.get('/templates', userRoles.requireOneOf(UserRoles.PING), async ctx => {
     const templates = await options.pings.getPingTemplates()
-    const canSeeAllTemplates = ctx.hasRoles(UserRoles.PING_TEMPLATES_WRITE)
+    const canSeeAllTemplates = await ctx.hasRoles(UserRoles.PING_TEMPLATES_WRITE)
     let response: ApiPingTemplatesResponse
     if (canSeeAllTemplates) {
       response = { templates }
     } else {
-      const neucoreGroups = ctx.session?.character?.neucoreGroups?.map(g => g.name) ?? []
+      const neucoreGroups = await ctx.getNeucoreGroups()
       response = {
         templates: templates.filter(t =>
           t.allowedNeucoreGroups.length === 0 ||
@@ -188,21 +189,26 @@ export function getRouter(options: {
     ctx.body = response
   })
 
-  router.post('/templates', userRoles.requireOneOf(UserRoles.PING_TEMPLATES_WRITE), async ctx => {
-    const template = await validateTemplateInput(ctx.request.body)
-    const channelName = await options.slackClient.getChannelName(template.slackChannelId)
-    const createdTemplate = await options.pings.addPingTemplate({
-      input: {
-        ...template,
-        slackChannelName: channelName,
-      },
-      characterName: ctx.session?.character?.name ?? '',
-    })
-    ctx.body = createdTemplate
-  })
+  router.post(
+    '/templates',
+    userRoles.requireOneFreshOf(UserRoles.PING_TEMPLATES_WRITE),
+    async ctx => {
+      const template = await validateTemplateInput(ctx.request.body)
+      const channelName = await options.slackClient.getChannelName(template.slackChannelId)
+      const createdTemplate = await options.pings.addPingTemplate({
+        input: {
+          ...template,
+          slackChannelName: channelName,
+        },
+        characterName: ctx.session?.character?.name ?? '',
+      })
+      ctx.body = createdTemplate
+    }
+  )
 
-  router.put('/templates/:templateId',
-    userRoles.requireOneOf(UserRoles.PING_TEMPLATES_WRITE),
+  router.put(
+    '/templates/:templateId',
+    userRoles.requireOneFreshOf(UserRoles.PING_TEMPLATES_WRITE),
     async ctx => {
       const templateId = parseInt(ctx.params['templateId'] ?? '', 10)
       if (!isFinite(templateId)) {
@@ -229,8 +235,9 @@ export function getRouter(options: {
     }
   )
 
-  router.delete('/templates/:templateId',
-    userRoles.requireOneOf(UserRoles.PING_TEMPLATES_WRITE),
+  router.delete(
+    '/templates/:templateId',
+    userRoles.requireOneFreshOf(UserRoles.PING_TEMPLATES_WRITE),
     async ctx => {
       const templateId = parseInt(ctx.params['templateId'] ?? '', 10)
       if (!isFinite(templateId)) {
@@ -260,8 +267,9 @@ export function getRouter(options: {
     }
   )
 
-  router.put('/view-permissions/groups/:group',
-    userRoles.requireOneOf(UserRoles.PING_TEMPLATES_WRITE),
+  router.put(
+    '/view-permissions/groups/:group',
+    userRoles.requireOneFreshOf(UserRoles.PING_TEMPLATES_WRITE),
     async ctx => {
       const neucoreGroup = ctx.params['group']
       if (!neucoreGroup) {
@@ -288,8 +296,9 @@ export function getRouter(options: {
     }
   )
 
-  router.put('/view-permissions/channels/:channelId',
-    userRoles.requireOneOf(UserRoles.PING_TEMPLATES_WRITE),
+  router.put(
+    '/view-permissions/channels/:channelId',
+    userRoles.requireOneFreshOf(UserRoles.PING_TEMPLATES_WRITE),
     async ctx => {
       const channelId = ctx.params['channelId']
       if (!channelId) {

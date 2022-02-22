@@ -4,7 +4,7 @@ import bodyParser from 'koa-bodyparser'
 import { UserRoles } from '@ping-board/common'
 import { EventsRepository, PingsRepository } from './database'
 import { getSessionMiddleware, SessionProvider } from './middleware/session'
-import { getUserRolesMiddleware } from './middleware/user-roles'
+import { getUserRolesMiddleware, NeucoreGroupsProvider } from './middleware/user-roles'
 import { NeucoreClient } from './neucore'
 import { getRouter as getApiRouter } from './routes/api'
 import { getRouter as getAuthRouter } from './routes/auth'
@@ -14,8 +14,11 @@ import { SlackClient } from './slack/slack-client'
 export function getApp(options: {
   eveSsoClient: EveSSOClient,
   neucoreClient: NeucoreClient,
+  neucoreGroupsProvider: NeucoreGroupsProvider,
   slackClient: SlackClient,
   sessionProvider: SessionProvider,
+  sessionTimeout: number,
+  sessionRefreshInterval: number,
   cookieSigningKeys?: string[],
   events: EventsRepository,
   pings: PingsRepository,
@@ -32,6 +35,8 @@ export function getApp(options: {
     app,
     sessionCookieName: 'pingboard-session',
     sessionProvider: options.sessionProvider,
+    sessionTimeout: options.sessionTimeout,
+    sessionRefreshInterval: options.sessionRefreshInterval,
   }))
   app.use(getUserRolesMiddleware(options))
   app.use(bodyParser({ enableTypes: ['json'] }))

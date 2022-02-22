@@ -5,6 +5,7 @@ import { EveSSOClient } from './sso/eve-sso-client'
 import { InMemorySessionProvider } from './util/in-memory-session-provider'
 import { UserRoles } from '@ping-board/common'
 import { SlackClient } from './slack/slack-client'
+import { NeucoreGroupCache } from './neucore/neucore-group-cache'
 
 async function main() {
   const eveSsoClient = new EveSSOClient({
@@ -19,11 +20,18 @@ async function main() {
     appId: getFromEnv('CORE_APP_ID'),
     appToken: getFromEnv('CORE_APP_TOKEN'),
   })
+  const neucoreGroupsProvider = new NeucoreGroupCache({
+    neucoreClient,
+    cacheTTL: getNumberFromEnv('CORE_GROUP_REFRESH_INTERVAL', 60) * 1000,
+  })
 
   const slackClient = new SlackClient(getFromEnv('SLACK_TOKEN'))
 
+  const sessionTimeout = getNumberFromEnv('SESSION_TIMEOUT', 7 * 24 * 60 * 60) * 1000
+  const sessionRefreshInterval = getNumberFromEnv('SESSION_REFRESH_INTERVAL', 60) * 1000
   const sessionProvider = new InMemorySessionProvider()
   sessionProvider.startAutoCleanup()
+
 
   const cookieSigningKeys = process.env.COOKIE_KEY?.split(' ')
 
@@ -51,8 +59,11 @@ async function main() {
   const app = getApp({
     eveSsoClient,
     neucoreClient,
+    neucoreGroupsProvider,
     slackClient,
     sessionProvider,
+    sessionTimeout,
+    sessionRefreshInterval,
     cookieSigningKeys,
     events,
     pings,
@@ -80,6 +91,21 @@ function getFromEnv(key: string): string {
     throw new Error(`Missing env variable: ${key}`)
   }
   return value
+}
+
+function getNumberFromEnv(key: string, fallback?: number): number {
+  const value = process.env[key]
+  if (typeof value !== 'string') {
+    if (typeof fallback === 'number') {
+      return fallback
+    }
+    throw new Error(`Missing env variable: ${key}`)
+  }
+  const asNumber = Number(value)
+  if (!Number.isFinite(asNumber)) {
+    throw new Error(`Env variable is not a number: ${key}`)
+  }
+  return asNumber
 }
 
 main().catch(error => {

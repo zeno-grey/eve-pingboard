@@ -32,12 +32,10 @@ export function getRouter(options: {
     const character = await options.eveSsoClient.handleCallback(session.id, ctx.query, ctx.href)
 
     try {
-      const neucoreGroups = await options.neucoreClient.getCharacterGroups(character.characterId)
       await ctx.resetSession({
         character: {
           id: character.characterId,
           name: character.name,
-          neucoreGroups,
         },
       })
       console.log(`Successfully logged in ${character.name}`)

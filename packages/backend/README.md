@@ -58,6 +58,11 @@ PORT=3000
 COOKIE_KEY
 # Connection string for connecting with the SQL database (MariaDB/MySQL)
 DB_URL
+# How long a new session should be valid for (in seconds).
+SESSION_TIMEOUT=604800
+# Interval in seconds at which an active session should be extended to SESSION_TIMEOUT again.
+# If you don't want to extend sessions at all, you may set this to -1.
+SESSION_REFRESH_INTERVAL=60
 ```
 
 ### Eve SSO configuration
@@ -90,6 +95,9 @@ CORE_URL
 CORE_APP_ID
 # The Secret of the Neucore application (as obtained from Neucore)
 CORE_APP_TOKEN
+# Neucore groups will be cached between requests. This value controls how long the cache 
+# hould be valid for in seconds. Groups will always be refreshed on mutation requests.
+CORE_GROUP_REFRESH_INTERVAL=60
 ```
 
 ### User Permission/Role configuration

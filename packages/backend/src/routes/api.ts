@@ -14,14 +14,14 @@ export function getRouter(options: {
 }): Router {
   const router = new Router()
 
-  router.get('/me', ctx => {
+  router.get('/me', async ctx => {
     const response: ApiMeResponse = ctx.session?.character
       ? {
           isLoggedIn: true,
           character: {
             id: ctx.session.character.id,
             name: ctx.session.character.name,
-            roles: ctx.getRoles(),
+            roles: await ctx.getRoles(),
           },
         }
       : { isLoggedIn: false }
