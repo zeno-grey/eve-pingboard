@@ -20,12 +20,16 @@ export class InMemoryTTLCache<K, V> {
     this.maxEntries = options.maxEntries ?? null
   }
 
-  async get(key: K): Promise<V> {
-    const cached = this.cache.get(key)
-    if (cached) {
-      const { expires, value } = await cached
-      if (expires > Date.now()) {
-        return value
+  async get(key: K, forceRefresh = false): Promise<V> {
+    if (forceRefresh) {
+      this.cache.delete(key)
+    } else {
+      const cached = this.cache.get(key)
+      if (cached) {
+        const { expires, value } = await cached
+        if (expires > Date.now()) {
+          return value
+        }
       }
     }
     const newValue = (async () => {
