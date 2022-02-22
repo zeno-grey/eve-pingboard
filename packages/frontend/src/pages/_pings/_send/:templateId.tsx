@@ -101,9 +101,11 @@ export function SendPing(): JSX.Element {
         input.scheduledTitle = editedPing.calendarEntryTitle
       }
       setShowSendingDialog(true)
-      postPing(input).then(() => {
-        setLastSentPing({ text: input.text, templateId: template.id })
-        setEditedPing(p => ({ ...p, text: '' }))
+      postPing(input).then(result => {
+        if (!('error' in result)) {
+          setLastSentPing({ text: input.text, templateId: template.id })
+          setEditedPing(p => ({ ...p, text: '' }))
+        }
       })
     }
   }
