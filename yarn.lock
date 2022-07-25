@@ -2127,6 +2127,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^4.33.0
     "@typescript-eslint/parser": ^4.33.0
     client-oauth2: ^4.3.3
+    cockatiel: ^3.0.0-beta.1
     dayjs: ^1.10.7
     eslint: ^7.32.0
     http-errors: ^1.8.1
@@ -5729,6 +5730,13 @@ __metadata:
     chalk: ^2.4.1
     q: ^1.1.2
   checksum: 44736914aac2160d3d840ed64432a90a3bb72285a0cd6a688eb5cabdf15d15a85eee0915b3f6f2a4659d5075817b1cb577340d3c9cbb47d636d59ab69f819552
+  languageName: node
+  linkType: hard
+
+"cockatiel@npm:^3.0.0-beta.1":
+  version: 3.0.0-beta.1
+  resolution: "cockatiel@npm:3.0.0-beta.1"
+  checksum: 9cc8571cd418c9e72cb1cd8b2f66e0626b1a8851d92fa57a8621f1bbc06ee0845c6971aa88d9de0589cbc5a975b6ad27f549196ece6b8a69529986408f246439
   languageName: node
   linkType: hard
 
