@@ -19,10 +19,11 @@ export class NeucoreError extends Error {
 export class NeucoreResponseError extends NeucoreError {
   constructor(
     message: string,
+    path: string,
     public readonly response: Response,
     underlyingError?: Error
   ) {
-    super(message, underlyingError)
+    super(message + ` (while fetching ${path})`, underlyingError)
   }
 }
 
@@ -64,6 +65,7 @@ export class NeucoreClient {
       } catch (error) {
         throw new NeucoreResponseError(
           'Failed to parse response',
+          path,
           response,
           error
         )
@@ -71,6 +73,7 @@ export class NeucoreClient {
     }
     throw new NeucoreResponseError(
       `Received unexpected status code: ${response.status}`,
+      path,
       response
     )
   }
